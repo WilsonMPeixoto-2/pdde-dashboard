@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "aos": "^2.3.4",
+    "canvas-confetti": "^1.9.4",
+    "sweetalert2": "^11.26.23",
+    "tippy.js": "^6.3.7",
+    "xlsx": "^0.18.5"
+  }
+}

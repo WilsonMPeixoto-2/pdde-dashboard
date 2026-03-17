@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel PDDE 2026</title>
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Animation & UI Enhancements -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tooltips -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i data-lucide="bar-chart-2"></i>
+                </div>
+                <h2>PDDE <span>2025/2026</span></h2>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <h3>FILTRO POR TIPO</h3>
+                    <label class="custom-checkbox cb-basico">
+                        <input type="checkbox" id="filter-basico" checked>
+                        <span class="checkmark"></span>
+                        BÁSICO
+                    </label>
+                    <label class="custom-checkbox cb-qualidade">
+                        <input type="checkbox" id="filter-qualidade" checked>
+                        <span class="checkmark"></span>
+                        QUALIDADE
+                    </label>
+                    <label class="custom-checkbox cb-equidade">
+                        <input type="checkbox" id="filter-equidade" checked>
+                        <span class="checkmark"></span>
+                        EQUIDADE
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h3>FILTRO POR CRE</h3>
+                    <div class="custom-select">
+                        <select id="filter-cre">
+                            <option value="all">Todas as CREs</option>
+                            <option value="4" selected>4ª CRE</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>STATUS DO PROCESSO</h3>
+                    <div class="custom-select">
+                        <select id="filter-status">
+                            <option value="all">Ver Todos os Status</option>
+                            <option value="concluido">Processos Gerados</option>
+                            <option value="pendente">Instrução Pendente</option>
+                            <option value="atraso">Atraso Documental</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-indicator">
+                <div class="connection-status">
+                    <i data-lucide="check-circle-2" class="sync-icon"></i>
+                    <p>Sincronizado às <span id="sync-time">--:--</span></p>
+                </div>
+                <div class="data-source">
+                    <p class="source-label">Fonte de Dados Oficial:</p>
+                    <a href="https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=EqLPrs" target="_blank" class="source-link">
+                        <i data-lucide="file-spreadsheet" class="excel-icon"></i>
+                        <span>PDDE_2026_FINAL.xlsx</span>
+                        <i data-lucide="external-link" class="external-icon"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="greeting">
+                        <p class="subtitle">Painel Gerencial — GAD 4ª CRE</p>
+                        <h1 class="text-gradient">Acompanhamento de Processos</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-action" id="btn-theme-toggle" title="Alterar Tema">
+                        <i data-lucide="moon"></i>
+                        <span>Escuro</span>
+                    </button>
+                    <button class="btn-action" id="btn-mobile-view" title="Simular Smartphone">
+                        <i data-lucide="smartphone"></i>
+                        <span>Mobile</span>
+                    </button>
+                    <button class="btn-primary" id="btn-export">
+                        <i data-lucide="file-down"></i>
+                        <span>Exportar PDF</span>
+                    </button>
+                    <div class="user-avatar" title="Wilson M. Peixoto">WP</div>
+                </div>
+            </header>
+
+            <!-- KPI Cards -->
+            <section class="kpi-grid">
+                <div class="kpi-card highlight">
+                    <div class="kpi-header">
+                        <p class="kpi-title">Visão Global</p>
+                        <div class="icon-wrapper bg-concluido">
+                            <i data-lucide="layers" class="kpi-icon"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-content">
+                        <h2 class="kpi-value" id="total-geral">0</h2>
+                        <p class="kpi-trend">Processos Gerados</p>
+                    </div>
+                </div>
+                <div class="kpi-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="kpi-header">
+                        <p class="kpi-title">Custeio Básico</p>
+                        <div class="icon-wrapper bg-basico">
+                            <i data-lucide="home" class="kpi-icon"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-content">
+                        <h2 class="kpi-value"><span id="pct-basico">0</span>%</h2>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar bar-basico" id="bar-basico" style="width: 0%"></div>
+                        </div>
+                        <p class="kpi-sub" id="count-basico"></p>
+                    </div>
+                </div>
+                <div class="kpi-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="kpi-header">
+                        <p class="kpi-title">Qualidade</p>
+                        <div class="icon-wrapper bg-qualidade">
+                            <i data-lucide="award" class="kpi-icon"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-content">
+                        <h2 class="kpi-value"><span id="pct-qualidade">0</span>%</h2>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar bar-qualidade" id="bar-qualidade" style="width: 0%"></div>
+                        </div>
+                        <p class="kpi-sub" id="count-qualidade"></p>
+                    </div>
+                </div>
+                <div class="kpi-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="kpi-header">
+                        <p class="kpi-title">Equidade</p>
+                        <div class="icon-wrapper bg-equidade">
+                            <i data-lucide="users" class="kpi-icon"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-content">
+                        <h2 class="kpi-value"><span id="pct-equidade">0</span>%</h2>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar bar-equidade" id="bar-equidade" style="width: 0%"></div>
+                        </div>
+                        <p class="kpi-sub" id="count-equidade"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Area -->
+            <section class="charts-grid">
+                <div class="chart-card main-chart">
+                    <div class="chart-header">
+                        <h3>Distribuição Geral por Tipo</h3>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card side-chart">
+                    <div class="chart-header">
+                        <h3>Índice de Instrução Processual</h3>
+                    </div>
+                    <div class="canvas-container doughnut-container">
+                        <canvas id="doughnutChart"></canvas>
+                        <div class="doughnut-center">
+                            <h2 id="global-pct">0%</h2>
+                            <p>Progresso Geral</p>
+                        </div>
+                    </div>
+                    <div class="doughnut-legend">
+                        <div class="doughnut-legend-item"><span class="dot bg-concluido" id="legend-dot-concluido"></span> Processos Gerados</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-pendente" id="legend-dot-pendente"></span> Instrução Pendente</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-atraso" id="legend-dot-atraso"></span> Atraso Documental</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nominal School Lists -->
+            <section class="school-lists-section" data-aos="fade-up">
+                <h2 class="section-title">Detalhamento Nominal por Unidade Escolar</h2>
+                <div id="school-lists"></div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
