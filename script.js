@@ -195,42 +195,56 @@ function attachEventListeners() {
         });
     }
 
-    const themeToggleBtn = document.getElementById('btn-theme-toggle');
-    themeToggleBtn.addEventListener('click', () => {
-        const html = document.documentElement;
-        const currentTheme = html.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        const icon = themeToggleBtn.querySelector('i');
-        const label = themeToggleBtn.querySelector('span');
-
-        html.setAttribute('data-theme', newTheme);
-
-        if (newTheme === 'dark') {
-            icon.setAttribute('data-lucide', 'sun');
-            label.textContent = 'Tema Claro';
-        } else {
-            icon.setAttribute('data-lucide', 'moon');
-            label.textContent = 'Tema Escuro';
+    const replaceLucideIcon = (button, iconName) => {
+        const currentIcon = button?.querySelector('svg, i');
+        if (!currentIcon) {
+            return;
         }
 
-        lucide.createIcons();
-        applyColorsToCharts();
-    });
+        const replacement = document.createElement('i');
+        const currentClasses = currentIcon.getAttribute('class');
+
+        replacement.setAttribute('data-lucide', iconName);
+        if (currentClasses) {
+            replacement.setAttribute('class', currentClasses);
+        }
+
+        currentIcon.replaceWith(replacement);
+    };
+
+    const themeToggleBtn = document.getElementById('btn-theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            const label = themeToggleBtn.querySelector('span');
+
+            html.setAttribute('data-theme', newTheme);
+            replaceLucideIcon(themeToggleBtn, newTheme === 'dark' ? 'sun' : 'moon');
+
+            if (label) {
+                label.textContent = newTheme === 'dark' ? 'Claro' : 'Escuro';
+            }
+
+            lucide.createIcons();
+            applyColorsToCharts();
+        });
+    }
 
     const btnMobileView = document.getElementById('btn-mobile-view');
     if (btnMobileView) {
         btnMobileView.addEventListener('click', () => {
             const container = document.querySelector('.app-container');
-            const icon = btnMobileView.querySelector('i');
             const label = btnMobileView.querySelector('span');
 
             container.classList.toggle('mobile-simulated');
 
             if (container.classList.contains('mobile-simulated')) {
-                icon.setAttribute('data-lucide', 'monitor');
+                replaceLucideIcon(btnMobileView, 'monitor');
                 label.textContent = 'Voltar ao PC';
             } else {
-                icon.setAttribute('data-lucide', 'smartphone');
+                replaceLucideIcon(btnMobileView, 'smartphone');
                 label.textContent = 'Mobile';
             }
 
