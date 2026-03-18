@@ -121,8 +121,9 @@ body::after {
     --text-muted: #95a6c0;
     --text-soft: #c8d3e2;
     
-    --glass-bg: rgba(15, 23, 42, 0.78);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(15, 23, 42, 0.9);
+    --glass-border: rgba(100, 116, 139, 0.22);
+    --glass-shimmer: linear-gradient(140deg, rgba(148, 163, 184, 0.08) 0%, rgba(148, 163, 184, 0.03) 26%, rgba(15, 23, 42, 0) 68%);
 
     --color-concluido: #34d399;
     --color-pendente: #fbbf24;
@@ -1173,6 +1174,10 @@ body {
     background: var(--glass-shimmer);
     opacity: 0.5;
     pointer-events: none;
+}
+
+[data-theme="dark"] .kpi-card::before {
+    opacity: 0.14;
 }
 
 
