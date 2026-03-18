@@ -119,10 +119,6 @@
                         <i data-lucide="moon"></i>
                         <span>Escuro</span>
                     </button>
-                    <button class="btn-action" id="btn-mobile-view" title="Simular Smartphone">
-                        <i data-lucide="smartphone"></i>
-                        <span>Mobile</span>
-                    </button>
                     <button class="btn-primary" id="btn-export">
                         <i data-lucide="file-down"></i>
                         <span>Exportar PDF</span>
@@ -130,43 +126,6 @@
                     <div class="user-avatar" title="Wilson M. Peixoto">WP</div>
                 </div>
             </header>
-
-            <section class="hero-panel" data-aos="fade-up">
-                <div class="hero-panel__content">
-                    <div class="hero-panel__kicker">
-                        <span class="hero-panel__live-dot"></span>
-                        Monitoramento contínuo da planilha oficial
-                    </div>
-                    <h2 class="hero-panel__title">Uma leitura viva do PDDE, com foco visual no que avançou e no que ainda exige ação imediata.</h2>
-                    <p class="hero-panel__description" id="hero-description">
-                        Conectado à fonte oficial de trabalho, com rastreabilidade da origem, leitura do recorte ativo e atualização sob demanda.
-                    </p>
-                    <div class="hero-panel__chips">
-                        <span class="hero-chip hero-chip--accent" id="hero-source-chip">Share --</span>
-                        <span class="hero-chip" id="hero-hash-chip">Hash --</span>
-                        <span class="hero-chip" id="hero-scope-chip">4ª CRE</span>
-                    </div>
-                </div>
-                <div class="hero-panel__stats">
-                    <div class="hero-stat hero-stat--success">
-                        <span class="hero-stat__label">Concluídos</span>
-                        <strong class="hero-stat__value" id="hero-concluded">0</strong>
-                        <span class="hero-stat__sub" id="hero-concluded-sub">0% do recorte</span>
-                    </div>
-                    <div class="hero-stat hero-stat--warning">
-                        <span class="hero-stat__label">Pendências</span>
-                        <strong class="hero-stat__value" id="hero-pending">0</strong>
-                        <span class="hero-stat__sub" id="hero-pending-sub">0% do recorte</span>
-                    </div>
-                    <div class="hero-stat hero-stat--danger">
-                        <span class="hero-stat__label">Atrasos</span>
-                        <strong class="hero-stat__value" id="hero-atraso">0</strong>
-                        <span class="hero-stat__sub" id="hero-atraso-sub">0% do recorte</span>
-                    </div>
-                </div>
-                <div class="hero-orb hero-orb--one"></div>
-                <div class="hero-orb hero-orb--two"></div>
-            </section>
 
             <!-- KPI Cards -->
             <section class="kpi-grid">
@@ -229,33 +188,11 @@
                 </div>
             </section>
 
-            <section class="insight-rail" data-aos="fade-up" data-aos-delay="120">
-                <article class="insight-card insight-card--positive">
-                    <p class="insight-card__eyebrow">Melhor ritmo</p>
-                    <h3 id="insight-best-title">Aguardando leitura</h3>
-                    <p id="insight-best-copy">Assim que os dados carregarem, esta área aponta o tipo com maior taxa de conclusão.</p>
-                </article>
-                <article class="insight-card insight-card--warning">
-                    <p class="insight-card__eyebrow">Maior atenção</p>
-                    <h3 id="insight-risk-title">Aguardando leitura</h3>
-                    <p id="insight-risk-copy">Aqui aparece o grupo com mais volume crítico no recorte atual.</p>
-                </article>
-                <article class="insight-card insight-card--neutral">
-                    <p class="insight-card__eyebrow">Cobertura atual</p>
-                    <h3 id="insight-coverage-title">Painel em carga</h3>
-                    <p id="insight-coverage-copy">A análise executiva resume o tamanho do recorte e a força do progresso global.</p>
-                </article>
-            </section>
-
             <!-- Charts Area -->
             <section class="charts-grid">
                 <div class="chart-card main-chart">
                     <div class="chart-header">
-                        <div class="chart-heading">
-                            <span class="chart-eyebrow">Panorama comparativo</span>
-                            <h3>Distribuição Geral por Tipo</h3>
-                            <p class="chart-subtitle">Leitura empilhada dos fluxos concluídos, pendentes e em atraso por natureza do processo.</p>
-                        </div>
+                        <h3>Distribuição Geral por Tipo</h3>
                     </div>
                     <div class="canvas-container">
                         <canvas id="barChart"></canvas>
@@ -263,11 +200,7 @@
                 </div>
                 <div class="chart-card side-chart">
                     <div class="chart-header">
-                        <div class="chart-heading">
-                            <span class="chart-eyebrow">Saúde do recorte</span>
-                            <h3>Índice de Instrução Processual</h3>
-                            <p class="chart-subtitle">Participação percentual do avanço global dentro da seleção atualmente aplicada.</p>
-                        </div>
+                        <h3>Índice de Instrução Processual</h3>
                     </div>
                     <div class="canvas-container doughnut-container">
                         <canvas id="doughnutChart"></canvas>
@@ -287,7 +220,6 @@
             <!-- Nominal School Lists -->
             <section class="school-lists-section" data-aos="fade-up">
                 <h2 class="section-title">Detalhamento Nominal por Unidade Escolar</h2>
-                <p class="section-copy">Explore as listas por status para localizar rapidamente quem já avançou, quem ainda depende de instrução e onde há risco de atraso documental.</p>
                 <div id="school-lists"></div>
             </section>
         </main>

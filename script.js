@@ -28,7 +28,6 @@ const STATUS_META = {
 let ESCOLAS = [];
 let DASHBOARD_PAYLOAD = null;
 let charts = {};
-let lenisInstance = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (typeof AOS !== 'undefined') {
@@ -36,13 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initTooltips();
-    initSmoothScroll();
     initCharts();
     attachEventListeners();
     initMagnetEffect();
     hydrateFromCache();
     updateDashboard();
-    initAmbientMotion();
     await fetchLiveData({ announceSuccess: ESCOLAS.length === 0 });
 });
 
@@ -53,58 +50,6 @@ function initTooltips() {
         theme: 'translucent',
         animation: 'shift-away',
         inertia: true,
-    });
-}
-
-function initSmoothScroll() {
-    if (typeof Lenis === 'undefined' || lenisInstance) return;
-
-    lenisInstance = new Lenis({
-        duration: 1.05,
-        smoothWheel: true,
-        wheelMultiplier: 0.9,
-        easing: (value) => 1 - Math.pow(1 - value, 4),
-    });
-
-    const raf = (time) => {
-        lenisInstance.raf(time);
-        window.requestAnimationFrame(raf);
-    };
-
-    window.requestAnimationFrame(raf);
-}
-
-function initAmbientMotion() {
-    if (typeof gsap === 'undefined') return;
-
-    gsap.fromTo('.hero-panel, .kpi-card, .insight-card, .chart-card', {
-        opacity: 0,
-        y: 24,
-    }, {
-        opacity: 1,
-        y: 0,
-        duration: 0.85,
-        stagger: 0.06,
-        ease: 'power3.out',
-        clearProps: 'opacity,transform',
-    });
-
-    gsap.to('.hero-orb--one', {
-        x: 20,
-        y: 16,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-    });
-
-    gsap.to('.hero-orb--two', {
-        x: -18,
-        y: -14,
-        duration: 10,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
     });
 }
 
@@ -349,7 +294,7 @@ function updateDashboard() {
     const globalTotal = totalConcluded + totalPending + totalAtraso;
     const globalPct = globalTotal > 0 ? Math.round((totalConcluded / globalTotal) * 100) : 0;
 
-    setAnimatedNumber('total-geral', totalConcluded);
+    document.getElementById('total-geral').textContent = totalConcluded;
 
     updateTypeCard('basico', filters.basico ? stats.basico : buildEmptyStats());
     updateTypeCard('qualidade', filters.qualidade ? stats.qualidade : buildEmptyStats());
@@ -360,33 +305,14 @@ function updateDashboard() {
         charts.doughnut.update();
     }
 
-    setAnimatedNumber('global-pct', globalPct, '%');
-    updateHeroPanel({
-        filters,
-        activeTypes,
-        stats,
-        filteredSchools,
-        totalConcluded,
-        totalPending,
-        totalAtraso,
-        globalTotal,
-    });
-    updateInsightRail({
-        activeTypes,
-        stats,
-        filteredSchools,
-        totalConcluded,
-        totalPending,
-        totalAtraso,
-        globalTotal,
-    });
+    document.getElementById('global-pct').textContent = `${globalPct}%`;
     updateBarChart(activeTypes, stats);
     renderSchoolLists(activeTypes, filters.status, stats, filteredSchools);
     lucide.createIcons();
 }
 
 function updateTypeCard(type, stats) {
-    setAnimatedNumber(`pct-${type}`, stats.pctConcluded);
+    document.getElementById(`pct-${type}`).textContent = stats.pctConcluded;
     document.getElementById(`bar-${type}`).style.width = `${stats.pctConcluded}%`;
     document.getElementById(`count-${type}`).textContent = stats.total > 0
         ? `${stats.concluded} de ${stats.total} (${stats.pctConcluded}%)`
@@ -421,103 +347,6 @@ function buildEmptyStats() {
         pctPending: 0,
         pctAtraso: 0,
     };
-}
-
-function updateHeroPanel({ filters, activeTypes, filteredSchools, totalConcluded, totalPending, totalAtraso, globalTotal }) {
-    const source = DASHBOARD_PAYLOAD?.source;
-    const issues = DASHBOARD_PAYLOAD?.issues || [];
-    const namedCount = filteredSchools.filter((school) => !school.synthetic).length;
-    const sourceToken = shortToken(getShareToken(source?.shareUrl));
-    const shortHash = source?.workbookHash ? source.workbookHash.slice(0, 12) : '';
-    const scopeLabel = filters.cre === 'all' ? 'Todas as CREs' : `${filters.cre}ª CRE`;
-    const activeLabel = activeTypes.length === 0
-        ? 'Nenhum tipo ativo'
-        : activeTypes.map((type) => TYPE_META[type].label).join(' + ');
-
-    const description = globalTotal > 0
-        ? `${namedCount} unidade(s) nominais no recorte, ${issues.length} alerta(s) de integridade monitorados e foco atual em ${activeLabel.toLowerCase()}.`
-        : 'Ajuste os filtros para reconstruir o retrato executivo do painel.';
-
-    document.getElementById('hero-description').textContent = description;
-    document.getElementById('hero-source-chip').textContent = sourceToken ? `Share ${sourceToken}` : 'Share indisponível';
-    document.getElementById('hero-hash-chip').textContent = shortHash ? `Hash ${shortHash}` : 'Hash indisponível';
-    document.getElementById('hero-scope-chip').textContent = scopeLabel;
-
-    setAnimatedNumber('hero-concluded', totalConcluded);
-    setAnimatedNumber('hero-pending', totalPending);
-    setAnimatedNumber('hero-atraso', totalAtraso);
-
-    document.getElementById('hero-concluded-sub').textContent = `${getPercent(totalConcluded, globalTotal)}% do recorte`;
-    document.getElementById('hero-pending-sub').textContent = `${getPercent(totalPending, globalTotal)}% do recorte`;
-    document.getElementById('hero-atraso-sub').textContent = `${getPercent(totalAtraso, globalTotal)}% do recorte`;
-}
-
-function updateInsightRail({ activeTypes, stats, filteredSchools, totalConcluded, totalPending, totalAtraso, globalTotal }) {
-    if (activeTypes.length === 0 || globalTotal === 0) {
-        document.getElementById('insight-best-title').textContent = 'Selecione ao menos um tipo';
-        document.getElementById('insight-best-copy').textContent = 'O melhor ritmo será calculado assim que houver um recorte válido.';
-        document.getElementById('insight-risk-title').textContent = 'Sem leitura ativa';
-        document.getElementById('insight-risk-copy').textContent = 'A maior atenção aparece quando há tipos ativos e dados no recorte.';
-        document.getElementById('insight-coverage-title').textContent = 'Painel em espera';
-        document.getElementById('insight-coverage-copy').textContent = 'Os cartões executivos acompanham o filtro selecionado em tempo real.';
-        return;
-    }
-
-    const bestType = getLeadingType(activeTypes, (type) => stats[type].pctConcluded);
-    const riskType = getLeadingType(activeTypes, (type) => stats[type].atraso);
-    const realSchools = filteredSchools.filter((school) => !school.synthetic).length;
-    const shortHash = DASHBOARD_PAYLOAD?.source?.workbookHash?.slice(0, 8);
-
-    document.getElementById('insight-best-title').textContent = TYPE_META[bestType].label;
-    document.getElementById('insight-best-copy').textContent = `${stats[bestType].concluded} de ${stats[bestType].total} já avançaram, com ${stats[bestType].pctConcluded}% de conclusão.`;
-
-    document.getElementById('insight-risk-title').textContent = TYPE_META[riskType].label;
-    document.getElementById('insight-risk-copy').textContent = `${stats[riskType].atraso} processo(s) em atraso e ${stats[riskType].pending} ainda pendente(s) de instrução no recorte atual.`;
-
-    document.getElementById('insight-coverage-title').textContent = `${realSchools} unidade(s) no foco atual`;
-    document.getElementById('insight-coverage-copy').textContent = `${totalConcluded} concluídos, ${totalPending} pendentes e ${totalAtraso} em atraso. ${shortHash ? `Fonte ${shortHash}.` : ''}`;
-}
-
-function getLeadingType(activeTypes, metricSelector) {
-    return activeTypes.reduce((leader, type) => (
-        metricSelector(type) > metricSelector(leader) ? type : leader
-    ), activeTypes[0]);
-}
-
-function getPercent(part, total) {
-    return total > 0 ? Math.round((part / total) * 100) : 0;
-}
-
-function setAnimatedNumber(targetId, nextValue, suffix = '') {
-    const element = document.getElementById(targetId);
-    if (!element) return;
-
-    const finalValue = Number(nextValue) || 0;
-
-    if (typeof gsap === 'undefined') {
-        element.textContent = `${finalValue}${suffix}`;
-        element.dataset.value = String(finalValue);
-        return;
-    }
-
-    const currentValue = Number(element.dataset.value || 0);
-    const state = element._counterState || { value: currentValue };
-    state.value = Number.isFinite(state.value) ? state.value : currentValue;
-    element._counterState = state;
-
-    gsap.killTweensOf(state);
-    gsap.to(state, {
-        value: finalValue,
-        duration: 0.8,
-        ease: 'power2.out',
-        onUpdate: () => {
-            element.textContent = `${Math.round(state.value)}${suffix}`;
-        },
-        onComplete: () => {
-            element.textContent = `${finalValue}${suffix}`;
-            element.dataset.value = String(finalValue);
-        },
-    });
 }
 
 function updateBarChart(activeTypes, stats) {
@@ -665,32 +494,29 @@ function renderSyncDetails() {
 
     if (source) {
         const fetchedAt = formatDateTime(source.fetchedAt);
-        const lastModified = formatDateTime(source.lastModified);
-        const shareToken = getShareToken(source.shareUrl);
-        const workbookHash = source.workbookHash ? source.workbookHash.slice(0, 12) : '';
         parts.push(`
             <div class="sync-detail">
                 <strong>Leitura online:</strong> ${fetchedAt || 'agora'}<br>
-                <strong>Aba analisada:</strong> ${escapeHtml(source.controlSheetName || 'CONTROLE')}<br>
-                <strong>Registros disponibilizados ao dashboard:</strong> ${recordCount}
-                ${lastModified ? `<br><strong>Arquivo no SharePoint:</strong> ${escapeHtml(lastModified)}` : ''}
-                ${shareToken || workbookHash ? `
-                    <div class="sync-meta-grid">
-                        ${shareToken ? `<span class="sync-meta-pill"><strong>Share ID:</strong> ${escapeHtml(shortToken(shareToken))}</span>` : ''}
-                        ${workbookHash ? `<span class="sync-meta-pill"><strong>Hash:</strong> ${escapeHtml(workbookHash)}</span>` : ''}
-                    </div>
-                ` : ''}
+                <strong>Aba:</strong> ${escapeHtml(source.controlSheetName || 'CONTROLE')}<br>
+                <strong>Registros:</strong> ${recordCount}
             </div>
         `);
     }
 
-    issues.forEach((issue) => {
+    if (issues.length > 0) {
         parts.push(`
-            <div class="sync-issue ${issue.severity || 'warning'}">
-                <strong>Integridade da fonte:</strong> ${escapeHtml(issue.message)}
-            </div>
+            <details class="sync-issue-group">
+                <summary>${issues.length} alerta(s) de integridade da planilha</summary>
+                <div class="sync-issue-list">
+                    ${issues.map((issue) => `
+                        <div class="sync-issue ${issue.severity || 'warning'}">
+                            ${escapeHtml(issue.message)}
+                        </div>
+                    `).join('')}
+                </div>
+            </details>
         `);
-    });
+    }
 
     if (!source && issues.length === 0) {
         parts.push(`
@@ -740,10 +566,6 @@ function formatDateTime(value) {
 }
 
 function initCharts() {
-    if (typeof ChartDataLabels !== 'undefined') {
-        Chart.register(ChartDataLabels);
-    }
-
     Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
     Chart.defaults.font.weight = '600';
 
@@ -773,16 +595,6 @@ function initCharts() {
                     bodyFont: { size: 13, weight: '600' },
                     callbacks: {
                         label: (ctx) => ` ${ctx.label}: ${ctx.raw} unidades`,
-                    },
-                },
-                datalabels: {
-                    color: '#0f172a',
-                    font: { weight: '700', size: 11 },
-                    formatter: (value, context) => {
-                        const values = context.chart.data.datasets[0].data || [];
-                        const total = values.reduce((sum, item) => sum + item, 0);
-                        if (!value || total === 0) return '';
-                        return `${Math.round((value / total) * 100)}%`;
                     },
                 },
             },
@@ -819,9 +631,6 @@ function initCharts() {
                     cornerRadius: 8,
                     bodyFont: { weight: '600' },
                 },
-                datalabels: {
-                    display: false,
-                },
             },
             scales: {
                 y: {
@@ -855,7 +664,6 @@ function applyColorsToCharts() {
     }
 
     if (charts.doughnut) {
-        charts.doughnut.options.plugins.datalabels.color = textColor;
         charts.doughnut.update();
     }
 }
@@ -928,21 +736,7 @@ function exportReport() {
 }
 
 function initMagnetEffect() {
-    const cards = document.querySelectorAll('.kpi-card, .insight-card, .hero-stat');
-
-    cards.forEach((card) => {
-        card.addEventListener('mousemove', (event) => {
-            const rect = card.getBoundingClientRect();
-            const x = event.clientX - rect.left - rect.width / 2;
-            const y = event.clientY - rect.top - rect.height / 2;
-
-            card.style.transform = `translateY(-12px) scale(1.03) rotateX(${-y / 20}deg) rotateY(${x / 20}deg)`;
-        });
-
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = '';
-        });
-    });
+    return;
 }
 
 function escapeHtml(value) {
