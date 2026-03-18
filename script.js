@@ -307,6 +307,7 @@ function updateDashboard() {
     const totalAtraso = activeTypes.reduce((sum, type) => sum + stats[type].atraso, 0);
     const globalTotal = totalConcluded + totalPending + totalAtraso;
     const globalPct = globalTotal > 0 ? Math.round((totalConcluded / globalTotal) * 100) : 0;
+    const approvalPct = globalTotal > 0 ? Math.round(((totalConcluded + totalPending) / globalTotal) * 100) : 0;
 
     document.getElementById('total-geral').textContent = totalConcluded;
 
@@ -319,7 +320,13 @@ function updateDashboard() {
         charts.doughnut.update();
     }
 
+    if (charts.approvalDoughnut) {
+        charts.approvalDoughnut.data.datasets[0].data = [totalConcluded, totalPending, totalAtraso];
+        charts.approvalDoughnut.update();
+    }
+
     document.getElementById('global-pct').textContent = `${globalPct}%`;
+    document.getElementById('approval-pct').textContent = `${approvalPct}%`;
     updateBarChart(activeTypes, stats);
     renderSchoolLists(activeTypes, filters.status, stats, filteredSchools);
     lucide.createIcons();
@@ -583,37 +590,43 @@ function initCharts() {
     Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
     Chart.defaults.font.weight = '600';
 
-    const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
-    charts.doughnut = new Chart(ctxDoughnut, {
-        type: 'doughnut',
-        data: {
-            labels: ['Processos Gerados', 'Instrução Pendente', 'Atraso Documental'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 0,
-                borderRadius: 12,
-                borderSkipped: false,
-            }],
-        },
-        options: {
-            cutout: '80%',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    borderWidth: 1,
-                    padding: 12,
-                    titleFont: { weight: '700', size: 14 },
-                    bodyFont: { size: 13, weight: '600' },
-                    callbacks: {
-                        label: (ctx) => ` ${ctx.label}: ${ctx.raw} unidades`,
+    const buildDoughnutChart = (canvasId) => {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Processos Gerados', 'Instrução Pendente', 'Atraso Documental'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0,
+                    borderRadius: 12,
+                    borderSkipped: false,
+                }],
+            },
+            options: {
+                cutout: '80%',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        borderWidth: 1,
+                        padding: 12,
+                        titleFont: { weight: '700', size: 14 },
+                        bodyFont: { size: 13, weight: '600' },
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.label}: ${ctx.raw} unidades`,
+                        },
                     },
                 },
             },
-        },
-    });
+        });
+    };
+
+    charts.doughnut = buildDoughnutChart('doughnutChart');
+    charts.approvalDoughnut = buildDoughnutChart('approvalDoughnutChart');
 
     const ctxBar = document.getElementById('barChart').getContext('2d');
     charts.bar = new Chart(ctxBar, {
@@ -679,6 +692,10 @@ function applyColorsToCharts() {
 
     if (charts.doughnut) {
         charts.doughnut.update();
+    }
+
+    if (charts.approvalDoughnut) {
+        charts.approvalDoughnut.update();
     }
 }
 

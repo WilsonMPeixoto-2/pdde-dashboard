@@ -200,19 +200,42 @@
                 </div>
                 <div class="chart-card side-chart">
                     <div class="chart-header">
-                        <h3>Índice de Instrução Processual</h3>
+                        <div class="chart-heading">
+                            <h3>Índice de Instrução Processual</h3>
+                            <p class="chart-subtitle">Considera progresso apenas os processos já gerados com número/código.</p>
+                        </div>
                     </div>
                     <div class="canvas-container doughnut-container">
                         <canvas id="doughnutChart"></canvas>
                         <div class="doughnut-center">
                             <h2 id="global-pct">0%</h2>
-                            <p>Progresso Geral</p>
+                            <p>Somente processos gerados</p>
                         </div>
                     </div>
                     <div class="doughnut-legend">
-                        <div class="doughnut-legend-item"><span class="dot bg-concluido" id="legend-dot-concluido"></span> Processos Gerados</div>
-                        <div class="doughnut-legend-item"><span class="dot bg-pendente" id="legend-dot-pendente"></span> Instrução Pendente</div>
-                        <div class="doughnut-legend-item"><span class="dot bg-atraso" id="legend-dot-atraso"></span> Atraso Documental</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-concluido"></span> Processos Gerados</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-pendente"></span> Instrução Pendente</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-atraso"></span> Atraso Documental</div>
+                    </div>
+                </div>
+                <div class="chart-card side-chart">
+                    <div class="chart-header">
+                        <div class="chart-heading">
+                            <h3>Índice de Análise e Aprovação da Prestação de Contas</h3>
+                            <p class="chart-subtitle">Conta como progresso os processos gerados e também os que já estão com instrução pendente.</p>
+                        </div>
+                    </div>
+                    <div class="canvas-container doughnut-container">
+                        <canvas id="approvalDoughnutChart"></canvas>
+                        <div class="doughnut-center">
+                            <h2 id="approval-pct">0%</h2>
+                            <p>Gerados + instrução pendente</p>
+                        </div>
+                    </div>
+                    <div class="doughnut-legend">
+                        <div class="doughnut-legend-item"><span class="dot bg-concluido"></span> Processos Gerados</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-pendente"></span> Instrução Pendente</div>
+                        <div class="doughnut-legend-item"><span class="dot bg-atraso"></span> Atraso Documental</div>
                     </div>
                 </div>
             </section>
