@@ -80,18 +80,22 @@
             </div>
             
             <div class="status-indicator">
-                <div class="connection-status">
-                    <i data-lucide="check-circle-2" class="sync-icon"></i>
-                    <p>Sincronizado às <span id="sync-time">--:--</span></p>
+                <div class="connection-status is-clickable" id="connection-status" role="button" tabindex="0" title="Atualizar agora">
+                    <i data-lucide="refresh-cw" class="sync-icon"></i>
+                    <div class="sync-copy">
+                        <p id="sync-label">Conectando a planilha online...</p>
+                        <span id="sync-time">Aguardando primeira leitura</span>
+                    </div>
                 </div>
                 <div class="data-source">
                     <p class="source-label">Fonte de Dados Oficial:</p>
-                    <a href="https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=EqLPrs" target="_blank" class="source-link">
+                    <a href="https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=YitaBf" target="_blank" class="source-link" id="source-link">
                         <i data-lucide="file-spreadsheet" class="excel-icon"></i>
-                        <span>PDDE_2026_FINAL.xlsx</span>
+                        <span id="source-file-name">PDDE_2026_FINAL.xlsx</span>
                         <i data-lucide="external-link" class="external-icon"></i>
                     </a>
                 </div>
+                <div id="sync-details" class="sync-details"></div>
             </div>
         </aside>
 

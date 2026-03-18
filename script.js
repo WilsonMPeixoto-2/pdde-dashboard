@@ -1,327 +1,246 @@
-// ========================================
-// PDDE 2026 Dashboard V4 — SaaS Premium Polish
-// ========================================
+const CACHE_KEY = 'pdde-dashboard-live-cache-v2';
+const DEFAULT_SOURCE_URL = 'https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=YitaBf';
 
-const DENOM_BASIC_QUAL = 164;
-const DENOM_EQUIT = 38;
+const TYPE_META = {
+    basico: { label: 'Básico' },
+    qualidade: { label: 'Qualidade' },
+    equidade: { label: 'Equidade' },
+};
+
+const STATUS_META = {
+    concluido: {
+        label: 'Processos Gerados na 4ª CRE',
+        icon: 'check-circle',
+        className: 'status-concluido',
+    },
+    pendente: {
+        label: 'Pendentes de Instrução Processual',
+        icon: 'clock',
+        className: 'status-pendente',
+    },
+    atraso: {
+        label: 'Atraso na Entrega Documental à GAD',
+        icon: 'alert-triangle',
+        className: 'status-atraso',
+    },
+};
 
 let ESCOLAS = [];
-
-function generateSchoolData() {
-    const nomes = [
-        "E.M. ALENCASTRO GUIMARÃES","E.M. ALFREDO DE PAULA FREITAS","E.M. ALICE DO AMARAL PEIXOTO",
-        "E.M. ALMEIDA GARRETT","E.M. ÁLVARO ALBERTO","E.M. AMAZONAS","E.M. AMILCAR VASCONCELLOS",
-        "E.M. ANA NÉRI","E.M. ANDRÉ URANI","E.M. ANÍBAL FREIRE","E.M. ANÍSIO TEIXEIRA",
-        "E.M. ANTÔNIO AUSTREGÉSILO","E.M. ANTÔNIO BANDEIRA","E.M. ARAGÃO GOMES",
-        "E.M. ARTUR AZEVEDO","E.M. AZEVEDO SODRÉ","E.M. BARÃO DE ITACURUSSÁ",
-        "E.M. BARÃO DO AMPARO","E.M. BERNARDO DE VASCONCELLOS","E.M. BOA ESPERANÇA",
-        "E.M. BOLÍVAR","E.M. BRIGADEIRO FARIA LIMA","E.M. CAMILO CASTELO BRANCO",
-        "E.M. CARDEAL LEME","E.M. CARLOS DRUMMOND DE ANDRADE","E.M. CARLOS GOMES",
-        "E.M. CARLOS MAXIMIANO","E.M. CARLOS ZÉPHIRO","E.M. CASTRO ALVES",
-        "E.M. CECÍLIA MEIRELES","E.M. CLÓVIS BEVILÁQUA","E.M. COMPOSITOR LUIZ GONZAGA",
-        "E.M. CONDESSA LAGES","E.M. CONSELHEIRO MAYRINK","E.M. CORAÇÃO DE MARIA",
-        "E.M. CYRO MONTEIRO","E.M. D. JAIME CÂMARA","E.M. DARCY RIBEIRO",
-        "E.M. DOM AQUINO CORRÊA","E.M. DOM HÉLDER CÂMARA","E.M. DOM PEDRO I",
-        "E.M. DOUTOR CÍCERO PENNA","E.M. DOUTOR COCIO BARCELLOS","E.M. DRUMOND",
-        "E.M. EDMUNDO BITTENCOURT","E.M. EDMUNDO LINS","E.M. EDUARDO RABELO",
-        "E.M. EMBAIXADOR ARAÚJO CASTRO","E.M. ENGENHEIRO GASTÃO RANGEL",
-        "E.M. EPITÁCIO PESSOA","E.M. ERNESTO DE SOUSA","E.M. ESTADO DA GUANABARA",
-        "E.M. ÉZIO COSTA","E.M. FERNANDO RODRIGUES DA SILVEIRA","E.M. FLORIANO PEIXOTO",
-        "E.M. FRANCISCO ALVES","E.M. FRANCISCO CAMPOS","E.M. FRANCISCO DE PAULA BRITO",
-        "E.M. FRIEDENREICH","E.M. GENERAL OSÓRIO","E.M. GENTIL DE MOURA",
-        "E.M. GETÚLIO VARGAS","E.M. GONÇALVES DIAS","E.M. GUILHERME TELL",
-        "E.M. HAYDEN WHITE","E.M. HENRIQUE DODSWORTH","E.M. HERÁCLITO FONTOURA SOBRAL PINTO",
-        "E.M. HERBERTO SALES","E.M. HILTON SANTOS","E.M. HOLANDA",
-        "E.M. HONÓRIO GURGEL","E.M. IRENE BARBOSA MONTEIRO","E.M. ISMAEL NERY",
-        "E.M. ITÁLIA","E.M. JÂNIO QUADROS","E.M. JEAN BAPTISTE DEBRET",
-        "E.M. JOAQUIM NABUCO","E.M. JOÃO BARBALHO","E.M. JOÃO KÖPKE",
-        "E.M. JORGE AMADO","E.M. JOSÉ ACCIOLI","E.M. JOSÉ APARECIDO",
-        "E.M. JOSÉ BONIFÁCIO","E.M. JOSÉ DE ALENCAR","E.M. JOSÉ PANCETTI",
-        "E.M. JOSÉ VERÍSSIMO","E.M. JOSUÉ DE CASTRO","E.M. JÚLIA KUBITSCHEK",
-        "E.M. JÚLIA LOPES DE ALMEIDA","E.M. LEITÃO DA CUNHA","E.M. LEOPOLDO MACHADO",
-        "E.M. LEVINDO COELHO","E.M. LINS DE VASCONCELOS","E.M. LUIZ CAMILLO",
-        "E.M. LUIZ CARLOS DA FONSECA","E.M. MACHADO DE ASSIS","E.M. MARECHAL TROMPOWSKY",
-        "E.M. MARIA CLARA MACHADO","E.M. MARIA QUITÉRIA","E.M. MARIETA DA CUNHA",
-        "E.M. MARIO FACCINI","E.M. MARQUÊS DE MARICÁ","E.M. MARQUÊS DO HERVAL",
-        "E.M. MATO GROSSO","E.M. MENDES VIANA","E.M. MESTRE DARCY DO JONGO",
-        "E.M. MIGUEL COUTO FILHO","E.M. MONTEIRO LOBATO","E.M. NARCISA AMÁLIA",
-        "E.M. NELSON MANDELA","E.M. NERVAL DE GOUVEIA","E.M. NILO PEÇANHA",
-        "E.M. NICARÁGUA","E.M. OLINTO DA GAMA BOTELHO","E.M. OLÍVIO CAMPISTA",
-        "E.M. ORESTES BARBOSA","E.M. OROZIMBO NONATO","E.M. OSCAR CLARK",
-        "E.M. OSÓRIO DUQUE ESTRADA","E.M. PADRE AGOSTINHO","E.M. PADRE LEONEL FRANCA",
-        "E.M. PANAMÁ","E.M. PARANAGUÁ","E.M. PARANÁ",
-        "E.M. PASTOR SAMUEL","E.M. PAULO DE FRONTIN","E.M. PAULO FREIRE",
-        "E.M. PEDRO ERNESTO","E.M. PEREIRA PASSOS","E.M. PERNAMBUCO",
-        "E.M. PIXINGUINHA","E.M. POETA M. BANDEIRA","E.M. PRESIDENTE KENNEDY",
-        "E.M. QUINTINO BOCAIÚVA","E.M. RAUL PEDERNEIRAS","E.M. REPÚBLICA ARGENTINA",
-        "E.M. REPÚBLICA DO PERU","E.M. RIBEIRO DE ANDRADA","E.M. RIO DE JANEIRO",
-        "E.M. RIO GRANDE DO SUL","E.M. RODRIGO OTÁVIO","E.M. ROSA LUXEMBURGO",
-        "E.M. RUBENS BERARDO","E.M. RUY BARBOSA","E.M. SALGADO FILHO",
-        "E.M. SANTA CATARINA","E.M. SANTA LUZIA","E.M. SANTO AMARO",
-        "E.M. SÃO SEBASTIÃO","E.M. SILVEIRA SAMPAIO","E.M. SOBRAL PINTO",
-        "E.M. SOUZA AGUIAR","E.M. TASSO DA SILVEIRA","E.M. TAVARES BASTOS",
-        "E.M. TENENTE ANTÔNIO JOÃO","E.M. TENENTE RENATO CÉSAR","E.M. TIRADENTES",
-        "E.M. THOMÉ DE SOUZA","E.M. TOMÁS ANTÔNIO GONZAGA","E.M. VIRGÍLIO DE MELO FRANCO",
-        "E.M. VISCONDE DE CAIRU","E.M. VISCONDE DE ITABORAÍ","E.M. VITA BRASIL",
-        "E.M. VIVALDO COARACY","E.M. VOLTA REDONDA","E.M. ZUZU ANGEL"
-    ];
-
-    while (nomes.length < 164) { nomes.push(`E.M. UNIDADE ESCOLAR ${nomes.length + 1}`); }
-
-    const schools = [];
-    for (let i = 0; i < 164; i++) {
-        const isEquidadeEligible = i < DENOM_EQUIT; 
-        
-        // Mock generation
-        let bDoc = i < 136, bProc = i < 106 ? `000704.${String(3000+i).padStart(6,'0')}/2026-${String(10+(i%90)).padStart(2,'0')}` : null;
-        let qDoc = i < 109, qProc = i < 59 ? `000704.${String(2000+i).padStart(6,'0')}/2026-${String(10+(i%90)).padStart(2,'0')}` : null;
-        let eDoc = isEquidadeEligible && i < 33, eProc = isEquidadeEligible && i < 27 ? `000704.${String(3200+i).padStart(6,'0')}/2026-${String(10+(i%90)).padStart(2,'0')}` : null;
-
-        schools.push({
-            nome: nomes[i],
-            equidadeEligible: isEquidadeEligible,
-            basico:    { docOk: bDoc, processo: bProc },
-            qualidade: { docOk: qDoc, processo: qProc },
-            equidade:  { docOk: eDoc, processo: eProc }
-        });
-    }
-    return schools;
-}
-
-function getStatus(escola, tipo) {
-    const data = escola[tipo];
-    if (!data) return null;
-    if (tipo === 'equidade' && !escola.equidadeEligible) return null;
-
-    if (data.processo) return 'concluido';
-    if (data.docOk) return 'pendente';
-    return 'atraso';
-}
-
-function getSchoolsByStatus(tipo, status) {
-    return ESCOLAS.filter(e => getStatus(e, tipo) === status);
-}
-
-function countByStatus(tipo) {
-    const eligible = tipo === 'equidade' ? ESCOLAS.filter(e => e.equidadeEligible) : ESCOLAS;
-    const denom = tipo === 'equidade' ? DENOM_EQUIT : DENOM_BASIC_QUAL;
-
-    const concluido = eligible.filter(e => getStatus(e, tipo) === 'concluido').length;
-    const pendente = eligible.filter(e => getStatus(e, tipo) === 'pendente').length;
-    
-    // For Equidade, the gap between eligible (found) and denom (total expected) is also "atraso"
-    // For Básico/Qualidade, denom=164 matches ESCOLAS.length, so it's consistent.
-    const atraso = denom - (concluido + pendente);
-
-    return {
-        concluido, pendente, atraso, denom,
-        pctConcluido: denom > 0 ? Math.round((concluido / denom) * 100) : 0,
-        pctPendente: denom > 0 ? Math.round((pendente / denom) * 100) : 0,
-        pctAtraso: denom > 0 ? Math.round((atraso / denom) * 100) : 0
-    };
-}
-
+let DASHBOARD_PAYLOAD = null;
 let charts = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize AOS
-    if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true });
-
-    // Custom Awwwards Magnet Effect & Cursor Follower
-    initMagnetEffect();
-
-    // Initialize Tooltips
-    if (typeof tippy !== 'undefined') {
-        tippy('[title]', {
-            theme: 'translucent',
-            animation: 'shift-away',
-            inertia: true
-        });
+    if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 800, once: true });
     }
 
-    // Starts with mock data immediately to not leave screen blank
-    ESCOLAS = generateSchoolData();
+    initTooltips();
     initCharts();
-    updateDashboard();
     attachEventListeners();
-    updateSyncTime();
-    
-    // Try to fetch LIVE DATA behind the scenes
-    await fetchLiveData();
+    initMagnetEffect();
+    hydrateFromCache();
+    updateDashboard();
+    await fetchLiveData({ announceSuccess: ESCOLAS.length === 0 });
 });
 
-async function fetchLiveData() {
+function initTooltips() {
+    if (typeof tippy === 'undefined') return;
+
+    tippy('[title]', {
+        theme: 'translucent',
+        animation: 'shift-away',
+        inertia: true,
+    });
+}
+
+function hydrateFromCache() {
+    const rawCache = window.localStorage.getItem(CACHE_KEY);
+    if (!rawCache) {
+        setSyncState('loading', 'Conectando à planilha online...', 'Aguardando a primeira leitura do SharePoint.');
+        return;
+    }
+
     try {
-        const btnSync = document.querySelector('.sync-icon');
-        const syncText = document.getElementById('sync-time');
-        
-        btnSync.setAttribute('data-lucide', 'refresh-cw');
-        btnSync.classList.add('spinning'); // Assume we add CSS animation for this
-        lucide.createIcons();
-        syncText.textContent = 'Buscando do Excel...';
-
-        const response = await fetch('/api/excel');
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            console.log('Real Data Arrived:', result.data.length, 'linhas');
-            ESCOLAS = parseRealExcelToObjects(result.data);
-            updateDashboard();
-            updateSyncTime();
-            
-            btnSync.setAttribute('data-lucide', 'check-circle-2');
-            btnSync.classList.remove('spinning');
-            
-            // Wow effect: Confetti!
-            if (typeof confetti !== 'undefined') {
-                confetti({
-                    particleCount: 150,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#3b82f6', '#10b981', '#f59e0b']
-                });
-            }
-            
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Dados Atualizados',
-                    text: 'O motor de análise foi sincronizado com sucesso!',
-                    icon: 'success',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-            }
-        } else {
-            throw new Error(result.error + ' - ' + (result.hint || ''));
+        const cachedPayload = JSON.parse(rawCache);
+        if (!cachedPayload || !Array.isArray(cachedPayload.records)) {
+            throw new Error('Cache inválido.');
         }
+
+        applyPayload(cachedPayload);
+        setSyncState(
+            'warning',
+            'Exibindo o último snapshot salvo',
+            buildSyncSubtitle(cachedPayload.source, 'Enquanto a atualização online não termina.')
+        );
     } catch (error) {
-        console.warn('Fallback to Local Mock Data. Reason:', error.message);
-        
-        const syncSection = document.querySelector('.connection-status');
-        syncSection.innerHTML = `
-            <i data-lucide="alert-triangle" class="sync-icon" style="color: var(--color-atraso);"></i>
-            <div style="display:flex; flex-direction:column;">
-                <p style="color:var(--color-atraso);">Bloqueio de Login da Azure/OneDrive</p>
-                <span style="font-size:0.7rem; line-height:1.2; padding-top:4px;">Para conectar o motor, o Excel precisa estar com acesso: "Qualquer pessoa com o link". Leia o painel.</span>
-            </div>
-        `;
-        lucide.createIcons();
+        console.warn('Não foi possível restaurar o cache local:', error.message);
+        window.localStorage.removeItem(CACHE_KEY);
+        setSyncState('loading', 'Conectando à planilha online...', 'Aguardando a primeira leitura do SharePoint.');
     }
 }
 
-function parseRealExcelToObjects(rows) {
-    // rows = array of arrays (each row is an array of cell values by column index)
-    // Column mapping based on the REAL Excel structure:
-    // Col D (idx 3) = NOME DA UNIDADE ESCOLAR
-    // Col E (idx 4) = "Todas as documentações concluídas e assinadas - Data" (Básico Doc)
-    // Col F (idx 5) = "Nº Processo Básico"
-    // Col J (idx 9) = "Todas as documentações concluídas e assinadas - Data" (Qualidade Doc)
-    // Col K (idx 10) = "Nº Processo Qualidade"
-    // Col O (idx 14) = "Todas as documentações concluídas e assinadas - Data" (Equidade Doc)
-    // Col P (idx 15) = "Nº Processo EQUIDADE"
-    
-    const COL_NOME = 3;
-    const COL_BASICO_DOC = 4;
-    const COL_BASICO_PROC = 5;
-    const COL_QUALIDADE_DOC = 9;
-    const COL_QUALIDADE_PROC = 10;
-    const COL_EQUIDADE_DOC = 14;
-    const COL_EQUIDADE_PROC = 15;
+async function fetchLiveData({ announceSuccess = false, manual = false } = {}) {
+    setSyncState('loading', 'Sincronizando com a planilha online...', 'Consultando a API do Excel em tempo real.');
 
-    const notEmpty = (val) => val !== undefined && val !== null && val !== '' && val !== false;
-
-    const schools = [];
-    
-    // First pass: find which schools have ANY equidade data to determine eligibility
-    rows.forEach(row => {
-        const nome = row[COL_NOME];
-        if (!nome || String(nome).trim() === '') return;
-        
-        const hasEquidadeData = notEmpty(row[COL_EQUIDADE_DOC]) || notEmpty(row[COL_EQUIDADE_PROC]);
-        
-        schools.push({
-            nome: String(nome).trim(),
-            equidadeEligible: hasEquidadeData,
-            basico: {
-                docOk: notEmpty(row[COL_BASICO_DOC]),
-                processo: notEmpty(row[COL_BASICO_PROC]) ? row[COL_BASICO_PROC] : null
+    try {
+        const response = await fetch(`/api/excel?ts=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                Pragma: 'no-cache',
             },
-            qualidade: {
-                docOk: notEmpty(row[COL_QUALIDADE_DOC]),
-                processo: notEmpty(row[COL_QUALIDADE_PROC]) ? row[COL_QUALIDADE_PROC] : null
-            },
-            equidade: {
-                docOk: notEmpty(row[COL_EQUIDADE_DOC]),
-                processo: notEmpty(row[COL_EQUIDADE_PROC]) ? row[COL_EQUIDADE_PROC] : null
-            }
         });
-    });
-    
-    console.log('Parsed', schools.length, 'schools from real Excel data');
-    console.log('Equidade eligible:', schools.filter(s => s.equidadeEligible).length);
-    
-    return schools;
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'A API retornou uma resposta inválida.');
+        }
+
+        applyPayload(result);
+        window.localStorage.setItem(CACHE_KEY, JSON.stringify(result));
+        updateDashboard();
+
+        setSyncState(
+            'success',
+            'Sincronizado com a planilha online',
+            buildSyncSubtitle(result.source, 'Clique aqui para forçar uma nova leitura.')
+        );
+
+        if ((manual || announceSuccess) && typeof confetti !== 'undefined') {
+            confetti({
+                particleCount: 130,
+                spread: 68,
+                origin: { y: 0.6 },
+                colors: ['#3b82f6', '#10b981', '#f59e0b'],
+            });
+        }
+
+        if (manual && typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Sincronização concluída',
+                text: 'Os dados foram atualizados diretamente da planilha online.',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2600,
+            });
+        }
+    } catch (error) {
+        console.warn('Falha ao sincronizar com a planilha online:', error.message);
+
+        const fallbackAvailable = ESCOLAS.length > 0;
+        const state = fallbackAvailable ? 'warning' : 'error';
+        const label = fallbackAvailable
+            ? 'Falha na atualização; mantendo último snapshot confiável'
+            : 'Falha ao sincronizar com a planilha online';
+        const subtitle = fallbackAvailable
+            ? `${error.message} Exibindo o último resultado salvo localmente.`
+            : error.message;
+
+        setSyncState(state, label, subtitle);
+        renderSyncDetails();
+
+        if (manual && typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Sincronização indisponível',
+                text: subtitle,
+                icon: 'warning',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3800,
+            });
+        }
+    }
+}
+
+function applyPayload(payload) {
+    DASHBOARD_PAYLOAD = payload;
+    ESCOLAS = Array.isArray(payload.records) ? payload.records : [];
+
+    const sourceLink = document.getElementById('source-link');
+    const sourceFileName = document.getElementById('source-file-name');
+
+    if (sourceLink) {
+        sourceLink.href = payload.source?.shareUrl || DEFAULT_SOURCE_URL;
+    }
+
+    if (sourceFileName) {
+        sourceFileName.textContent = payload.source?.controlSheetName
+            ? `PDDE_2026_FINAL.xlsx · aba ${payload.source.controlSheetName}`
+            : 'PDDE_2026_FINAL.xlsx';
+    }
+
+    renderSyncDetails();
 }
 
 function attachEventListeners() {
-    document.querySelectorAll('.custom-checkbox input').forEach(cb => {
-        cb.addEventListener('change', updateDashboard);
+    document.querySelectorAll('.custom-checkbox input').forEach((checkbox) => {
+        checkbox.addEventListener('change', updateDashboard);
     });
+
     document.getElementById('filter-status').addEventListener('change', updateDashboard);
+    document.getElementById('filter-cre').addEventListener('change', updateDashboard);
     document.getElementById('btn-export').addEventListener('click', exportReport);
-    
-    // Theme Toggle Logic
+
+    const connectionStatus = document.getElementById('connection-status');
+    if (connectionStatus) {
+        connectionStatus.addEventListener('click', () => fetchLiveData({ manual: true }));
+        connectionStatus.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                fetchLiveData({ manual: true });
+            }
+        });
+    }
+
     const themeToggleBtn = document.getElementById('btn-theme-toggle');
     themeToggleBtn.addEventListener('click', () => {
         const html = document.documentElement;
         const currentTheme = html.getAttribute('data-theme');
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', newTheme);
-        
         const icon = themeToggleBtn.querySelector('i');
-        const span = themeToggleBtn.querySelector('span');
-        
+        const label = themeToggleBtn.querySelector('span');
+
+        html.setAttribute('data-theme', newTheme);
+
         if (newTheme === 'dark') {
             icon.setAttribute('data-lucide', 'sun');
-            span.textContent = 'Tema Claro';
+            label.textContent = 'Tema Claro';
         } else {
             icon.setAttribute('data-lucide', 'moon');
-            span.textContent = 'Tema Escuro';
+            label.textContent = 'Tema Escuro';
         }
-        
+
         lucide.createIcons();
         applyColorsToCharts();
     });
 
-    // Mobile Simulation Toggle
     const btnMobileView = document.getElementById('btn-mobile-view');
     if (btnMobileView) {
         btnMobileView.addEventListener('click', () => {
             const container = document.querySelector('.app-container');
-            container.classList.toggle('mobile-simulated');
-            
-            const isMobile = container.classList.contains('mobile-simulated');
             const icon = btnMobileView.querySelector('i');
-            const span = btnMobileView.querySelector('span');
-            
-            if (isMobile) {
+            const label = btnMobileView.querySelector('span');
+
+            container.classList.toggle('mobile-simulated');
+
+            if (container.classList.contains('mobile-simulated')) {
                 icon.setAttribute('data-lucide', 'monitor');
-                span.textContent = 'Voltar ao PC';
+                label.textContent = 'Voltar ao PC';
             } else {
                 icon.setAttribute('data-lucide', 'smartphone');
-                span.textContent = 'Mobile';
+                label.textContent = 'Mobile';
             }
+
             lucide.createIcons();
-            setTimeout(() => window.dispatchEvent(new Event('resize')), 500); // Delayed resize for smooth transition
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 450);
         });
     }
 
-    // Actual Mobile Sidebar Toggle
     const btnMenu = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('sidebar');
-    
     if (btnMenu && sidebar) {
         const overlay = document.createElement('div');
         overlay.className = 'sidebar-overlay';
@@ -344,180 +263,307 @@ function getActiveFilters() {
         basico: document.getElementById('filter-basico').checked,
         qualidade: document.getElementById('filter-qualidade').checked,
         equidade: document.getElementById('filter-equidade').checked,
-        status: document.getElementById('filter-status').value
+        status: document.getElementById('filter-status').value,
+        cre: document.getElementById('filter-cre').value,
     };
 }
 
-function updateSyncTime() {
-    const now = new Date();
-    document.getElementById('sync-time').textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
+function getFilteredSchools() {
+    const { cre } = getActiveFilters();
+    if (cre === 'all') return ESCOLAS;
 
-function applyColorsToCharts() {
-    const style = getComputedStyle(document.body);
-    const cConcluido = style.getPropertyValue('--color-concluido').trim();
-    const cPendente = style.getPropertyValue('--color-pendente').trim();
-    const cAtraso = style.getPropertyValue('--color-atraso').trim();
-    const textMain = style.getPropertyValue('--text-main').trim();
-    const textMuted = style.getPropertyValue('--text-muted').trim();
-    const borderHeavy = style.getPropertyValue('--border-heavy').trim();
-    const bgCard = style.getPropertyValue('--bg-card').trim();
-
-    Chart.defaults.color = textMuted;
-
-    if(charts.doughnut) {
-        charts.doughnut.data.datasets[0].backgroundColor = [cConcluido, cPendente, cAtraso];
-        charts.doughnut.options.plugins.tooltip.backgroundColor = bgCard;
-        charts.doughnut.options.plugins.tooltip.titleColor = textMain;
-        charts.doughnut.options.plugins.tooltip.bodyColor = textMain;
-        charts.doughnut.options.plugins.tooltip.borderColor = borderHeavy;
-        charts.doughnut.update();
-    }
-    
-    if(charts.bar) {
-        charts.bar.data.datasets[0].backgroundColor = cConcluido;
-        charts.bar.data.datasets[1].backgroundColor = cPendente;
-        charts.bar.data.datasets[2].backgroundColor = cAtraso;
-        charts.bar.options.plugins.tooltip.backgroundColor = bgCard;
-        charts.bar.options.plugins.tooltip.titleColor = textMain;
-        charts.bar.options.plugins.tooltip.bodyColor = textMain;
-        charts.bar.options.plugins.tooltip.borderColor = borderHeavy;
-        charts.bar.options.scales.x.grid.color = 'transparent';
-        charts.bar.options.scales.y.grid.color = style.getPropertyValue('--border-color').trim();
-        charts.bar.update();
-    }
+    return ESCOLAS.filter((school) => {
+        if (!school.creCode) return true;
+        return String(school.creCode) === String(Number(cre));
+    });
 }
 
 function updateDashboard() {
     const filters = getActiveFilters();
-    const activeTypes = [];
-    if (filters.basico) activeTypes.push('basico');
-    if (filters.qualidade) activeTypes.push('qualidade');
-    if (filters.equidade) activeTypes.push('equidade');
-
+    const activeTypes = Object.keys(TYPE_META).filter((type) => filters[type]);
+    const filteredSchools = getFilteredSchools();
     const stats = {};
-    activeTypes.forEach(t => { stats[t] = countByStatus(t); });
 
-    let totalConcluido = 0, totalPendente = 0, totalAtraso = 0;
-    activeTypes.forEach(t => {
-        totalConcluido += stats[t].concluido;
-        totalPendente += stats[t].pendente;
-        totalAtraso += stats[t].atraso;
+    activeTypes.forEach((type) => {
+        stats[type] = calculateTypeStats(filteredSchools, type);
     });
 
-    document.getElementById('total-geral').textContent = totalConcluido;
-    
-    const pctB = stats.basico ? stats.basico.pctConcluido : 0;
-    const pctQ = stats.qualidade ? stats.qualidade.pctConcluido : 0;
-    const pctE = stats.equidade ? stats.equidade.pctConcluido : 0;
+    const totalConcluded = activeTypes.reduce((sum, type) => sum + stats[type].concluded, 0);
+    const totalPending = activeTypes.reduce((sum, type) => sum + stats[type].pending, 0);
+    const totalAtraso = activeTypes.reduce((sum, type) => sum + stats[type].atraso, 0);
+    const globalTotal = totalConcluded + totalPending + totalAtraso;
 
-    document.getElementById('pct-basico').textContent = filters.basico ? pctB : '0';
-    document.getElementById('pct-qualidade').textContent = filters.qualidade ? pctQ : '0';
-    document.getElementById('pct-equidade').textContent = filters.equidade ? pctE : '0';
+    document.getElementById('total-geral').textContent = totalConcluded;
 
-    document.getElementById('bar-basico').style.width = (filters.basico ? pctB : 0) + '%';
-    document.getElementById('bar-qualidade').style.width = (filters.qualidade ? pctQ : 0) + '%';
-    document.getElementById('bar-equidade').style.width = (filters.equidade ? pctE : 0) + '%';
-
-    document.getElementById('count-basico').textContent = filters.basico ? `${stats.basico.concluido} de ${stats.basico.denom} (${stats.basico.pctConcluido}%)` : '';
-    document.getElementById('count-qualidade').textContent = filters.qualidade ? `${stats.qualidade.concluido} de ${stats.qualidade.denom} (${stats.qualidade.pctConcluido}%)` : '';
-    document.getElementById('count-equidade').textContent = filters.equidade ? `${stats.equidade.concluido} de ${stats.equidade.denom} (${stats.equidade.pctConcluido}%)` : '';
-
-    const globalTotal = totalConcluido + totalPendente + totalAtraso;
-    const gPctC = globalTotal > 0 ? Math.round((totalConcluido / globalTotal) * 100) : 0;
+    updateTypeCard('basico', filters.basico ? stats.basico : buildEmptyStats());
+    updateTypeCard('qualidade', filters.qualidade ? stats.qualidade : buildEmptyStats());
+    updateTypeCard('equidade', filters.equidade ? stats.equidade : buildEmptyStats());
 
     if (charts.doughnut) {
-        charts.doughnut.data.datasets[0].data = [totalConcluido, totalPendente, totalAtraso];
+        charts.doughnut.data.datasets[0].data = [totalConcluded, totalPending, totalAtraso];
         charts.doughnut.update();
     }
-    document.getElementById('global-pct').textContent = gPctC + '%';
 
-    if (charts.bar) {
-        const labels = [];
-        const dataConcluido = [];
-        const dataPendente = [];
-        const dataAtraso = [];
-
-        activeTypes.forEach(t => {
-            const s = stats[t];
-            const labelMap = { basico: 'Básico', qualidade: 'Qualidade', equidade: 'Equidade' };
-            labels.push(labelMap[t]);
-            dataConcluido.push(s.concluido);
-            dataPendente.push(s.pendente);
-            dataAtraso.push(s.atraso);
-        });
-
-        charts.bar.data.labels = labels;
-        charts.bar.data.datasets[0].data = dataConcluido;
-        charts.bar.data.datasets[1].data = dataPendente;
-        charts.bar.data.datasets[2].data = dataAtraso;
-        charts.bar.update();
-    }
-
-    renderSchoolLists(activeTypes, filters.status, stats);
+    document.getElementById('global-pct').textContent = `${globalTotal > 0 ? Math.round((totalConcluded / globalTotal) * 100) : 0}%`;
+    updateBarChart(activeTypes, stats);
+    renderSchoolLists(activeTypes, filters.status, stats, filteredSchools);
     lucide.createIcons();
 }
 
-function renderSchoolLists(activeTypes, statusFilter, stats) {
+function updateTypeCard(type, stats) {
+    document.getElementById(`pct-${type}`).textContent = stats.pctConcluded;
+    document.getElementById(`bar-${type}`).style.width = `${stats.pctConcluded}%`;
+    document.getElementById(`count-${type}`).textContent = stats.total > 0
+        ? `${stats.concluded} de ${stats.total} (${stats.pctConcluded}%)`
+        : '';
+}
+
+function calculateTypeStats(schools, type) {
+    const relevant = schools.filter((school) => school[type] && school[type].status !== 'nao_aplicavel');
+    const concluded = relevant.filter((school) => school[type].status === 'concluido').length;
+    const pending = relevant.filter((school) => school[type].status === 'pendente').length;
+    const atraso = relevant.filter((school) => school[type].status === 'atraso').length;
+    const total = relevant.length;
+
+    return {
+        total,
+        concluded,
+        pending,
+        atraso,
+        pctConcluded: total > 0 ? Math.round((concluded / total) * 100) : 0,
+        pctPending: total > 0 ? Math.round((pending / total) * 100) : 0,
+        pctAtraso: total > 0 ? Math.round((atraso / total) * 100) : 0,
+    };
+}
+
+function buildEmptyStats() {
+    return {
+        total: 0,
+        concluded: 0,
+        pending: 0,
+        atraso: 0,
+        pctConcluded: 0,
+        pctPending: 0,
+        pctAtraso: 0,
+    };
+}
+
+function updateBarChart(activeTypes, stats) {
+    if (!charts.bar) return;
+
+    charts.bar.data.labels = activeTypes.map((type) => TYPE_META[type].label);
+    charts.bar.data.datasets[0].data = activeTypes.map((type) => stats[type].concluded);
+    charts.bar.data.datasets[1].data = activeTypes.map((type) => stats[type].pending);
+    charts.bar.data.datasets[2].data = activeTypes.map((type) => stats[type].atraso);
+    charts.bar.update();
+}
+
+function renderSchoolLists(activeTypes, statusFilter, stats, filteredSchools) {
     const container = document.getElementById('school-lists');
     container.innerHTML = '';
 
-    const statusTypes = ['concluido', 'pendente', 'atraso'];
-    const statusLabels = {
-        concluido: 'Processos Gerados na 4ª CRE',
-        pendente: 'Pendentes de Instrução Processual',
-        atraso: 'Atraso na Entrega Documental à GAD'
-    };
-    const statusIcons = { concluido: 'check-circle', pendente: 'clock', atraso: 'alert-triangle' };
-    const statusClasses = { concluido: 'status-concluido', pendente: 'status-pendente', atraso: 'status-atraso' };
-
-    statusTypes.forEach(status => {
+    Object.entries(STATUS_META).forEach(([status, meta]) => {
         if (statusFilter !== 'all' && statusFilter !== status) return;
 
+        const totalStatusCount = activeTypes.reduce((sum, type) => sum + getSchoolsByStatus(filteredSchools, type, status).length, 0);
         const card = document.createElement('div');
-        card.className = `school-list-card kpi-card ${statusClasses[status]}`;
+        card.className = `school-list-card kpi-card ${meta.className}`;
         card.setAttribute('data-aos', 'fade-up');
-
-        const schoolsByType = {};
-        activeTypes.forEach(tipo => {
-            const s = stats[tipo];
-            const tipoLabel = { basico: 'Básico', qualidade: 'Qualidade', equidade: 'Equidade' }[tipo];
-            const schoolsFound = getSchoolsByStatus(tipo, status);
-            
-            // Note: count reflects the logic (38 base for Equidade), while schoolsFound shows names from the file.
-            let count = s[status];
-            schoolsByType[tipoLabel] = { 
-                schools: schoolsFound, 
-                count: count, 
-                denom: s.denom, 
-                pct: status === 'concluido' ? s.pctConcluido : (status === 'pendente' ? s.pctPendente : s.pctAtraso)
-            };
-        });
-
-        const totalSchools = Object.values(schoolsByType).reduce((sum, v) => sum + v.count, 0);
 
         card.innerHTML = `
             <div class="school-list-header" onclick="this.parentElement.classList.toggle('expanded')">
                 <div class="school-list-title">
-                    <i data-lucide="${statusIcons[status]}"></i>
-                    <h3>${statusLabels[status]}</h3>
-                    <span class="school-list-badge">${totalSchools}</span>
+                    <i data-lucide="${meta.icon}"></i>
+                    <h3>${meta.label}</h3>
+                    <span class="school-list-badge">${totalStatusCount}</span>
                 </div>
                 <i data-lucide="chevron-down" class="expand-icon"></i>
             </div>
             <div class="school-list-body">
-                ${Object.entries(schoolsByType).map(([tipoLabel, data]) => `
-                    <div class="school-list-type-section">
-                        <h4>${tipoLabel} <span class="school-type-count">${data.count} de ${data.denom} (${data.pct}%)</span></h4>
-                        <div class="school-names-grid">
-                            ${data.schools.map(e => `<div class="school-name-chip">${e.nome}</div>`).join('')}
-                            ${data.schools.length === 0 ? '<p class="empty-list">Nenhuma unidade escolar nesta categoria.</p>' : ''}
-                        </div>
-                    </div>
-                `).join('')}
+                ${activeTypes.map((type) => renderTypeSection(type, stats[type], getSchoolsByStatus(filteredSchools, type, status), status)).join('')}
             </div>
         `;
+
         container.appendChild(card);
+    });
+}
+
+function renderTypeSection(type, stats, schools, status) {
+    const groupedSynthetic = groupSyntheticSchools(schools.filter((school) => school.synthetic));
+    const realSchools = schools.filter((school) => !school.synthetic);
+    const syntheticHtml = groupedSynthetic.map((group) => `
+        <div class="school-name-chip synthetic-chip" title="${escapeHtml(group.reason)}">
+            ${escapeHtml(group.label)}
+        </div>
+    `).join('');
+
+    const realHtml = realSchools.map((school) => `
+        <div class="school-name-chip" ${school.syntheticReason ? `title="${escapeHtml(school.syntheticReason)}"` : ''}>
+            ${escapeHtml(school.nome)}
+        </div>
+    `).join('');
+
+    const emptyState = realSchools.length === 0 && groupedSynthetic.length === 0
+        ? '<p class="empty-list">Nenhuma unidade escolar nesta categoria.</p>'
+        : '';
+
+    const pctMap = {
+        concluido: stats.pctConcluded,
+        pendente: stats.pctPending,
+        atraso: stats.pctAtraso,
+    };
+
+    const countMap = {
+        concluido: stats.concluded,
+        pendente: stats.pending,
+        atraso: stats.atraso,
+    };
+
+    return `
+        <div class="school-list-type-section">
+            <h4>${TYPE_META[type].label} <span class="school-type-count">${countMap[status]} de ${stats.total} (${pctMap[status]}%)</span></h4>
+            <div class="school-names-grid">
+                ${realHtml}
+                ${syntheticHtml}
+                ${emptyState}
+            </div>
+        </div>
+    `;
+}
+
+function groupSyntheticSchools(syntheticSchools) {
+    const groups = new Map();
+
+    syntheticSchools.forEach((school) => {
+        const key = `${school.syntheticKind}|${school.syntheticReason}`;
+        if (!groups.has(key)) {
+            groups.set(key, {
+                kind: school.syntheticKind,
+                reason: school.syntheticReason || '',
+                count: 0,
+            });
+        }
+
+        groups.get(key).count += 1;
+    });
+
+    return [...groups.values()].map((group) => ({
+        ...group,
+        label: group.kind === 'blank-control-row'
+            ? `${group.count} linha(s) vazia(s) contabilizada(s) na planilha`
+            : `${group.count} unidade(s) ainda não identificada(s) nominalmente`,
+    }));
+}
+
+function getSchoolsByStatus(schools, type, status) {
+    return schools.filter((school) => school[type] && school[type].status === status);
+}
+
+function setSyncState(state, label, subtitle) {
+    const container = document.getElementById('connection-status');
+    const icon = container.querySelector('.sync-icon');
+    const labelNode = document.getElementById('sync-label');
+    const timeNode = document.getElementById('sync-time');
+
+    container.classList.remove('sync-loading', 'sync-success', 'sync-warning', 'sync-error');
+    container.classList.add(`sync-${state}`);
+
+    const iconByState = {
+        loading: 'refresh-cw',
+        success: 'check-circle-2',
+        warning: 'alert-triangle',
+        error: 'shield-alert',
+    };
+
+    icon.setAttribute('data-lucide', iconByState[state] || 'refresh-cw');
+    labelNode.textContent = label;
+    timeNode.textContent = subtitle;
+    lucide.createIcons();
+}
+
+function renderSyncDetails() {
+    const syncDetails = document.getElementById('sync-details');
+    if (!syncDetails) return;
+
+    const source = DASHBOARD_PAYLOAD?.source;
+    const issues = DASHBOARD_PAYLOAD?.issues || [];
+    const recordCount = ESCOLAS.length;
+
+    const parts = [];
+
+    if (source) {
+        const fetchedAt = formatDateTime(source.fetchedAt);
+        const lastModified = formatDateTime(source.lastModified);
+        const shareToken = getShareToken(source.shareUrl);
+        const workbookHash = source.workbookHash ? source.workbookHash.slice(0, 12) : '';
+        parts.push(`
+            <div class="sync-detail">
+                <strong>Leitura online:</strong> ${fetchedAt || 'agora'}<br>
+                <strong>Aba analisada:</strong> ${escapeHtml(source.controlSheetName || 'CONTROLE')}<br>
+                <strong>Registros disponibilizados ao dashboard:</strong> ${recordCount}
+                ${lastModified ? `<br><strong>Arquivo no SharePoint:</strong> ${escapeHtml(lastModified)}` : ''}
+                ${shareToken || workbookHash ? `
+                    <div class="sync-meta-grid">
+                        ${shareToken ? `<span class="sync-meta-pill"><strong>Share ID:</strong> ${escapeHtml(shortToken(shareToken))}</span>` : ''}
+                        ${workbookHash ? `<span class="sync-meta-pill"><strong>Hash:</strong> ${escapeHtml(workbookHash)}</span>` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        `);
+    }
+
+    issues.forEach((issue) => {
+        parts.push(`
+            <div class="sync-issue ${issue.severity || 'warning'}">
+                <strong>Integridade da fonte:</strong> ${escapeHtml(issue.message)}
+            </div>
+        `);
+    });
+
+    if (!source && issues.length === 0) {
+        parts.push(`
+            <div class="sync-detail">
+                Aguardando a primeira resposta da API para exibir os detalhes da sincronização.
+            </div>
+        `);
+    }
+
+    syncDetails.innerHTML = parts.join('');
+}
+
+function buildSyncSubtitle(source, suffix = '') {
+    const fetchedAt = formatDateTime(source?.fetchedAt);
+    const modifiedAt = formatDateTime(source?.lastModified);
+    const details = [];
+
+    if (fetchedAt) details.push(`Lido em ${fetchedAt}`);
+    if (modifiedAt) details.push(`arquivo ${modifiedAt}`);
+    if (suffix) details.push(suffix);
+
+    return details.join(' · ');
+}
+
+function getShareToken(shareUrl) {
+    if (!shareUrl) return '';
+    const tokenMatch = shareUrl.match(/\/([A-Za-z0-9_-]{20,})\?/);
+    return tokenMatch ? tokenMatch[1] : '';
+}
+
+function shortToken(token) {
+    if (!token || token.length <= 14) return token || '';
+    return `${token.slice(0, 6)}...${token.slice(-6)}`;
+}
+
+function formatDateTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
     });
 }
 
@@ -535,8 +581,8 @@ function initCharts() {
                 backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
                 borderWidth: 0,
                 borderRadius: 12,
-                borderSkipped: false
-            }]
+                borderSkipped: false,
+            }],
         },
         options: {
             cutout: '80%',
@@ -549,10 +595,12 @@ function initCharts() {
                     padding: 12,
                     titleFont: { weight: '700', size: 14 },
                     bodyFont: { size: 13, weight: '600' },
-                    callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} unidades` }
-                }
-            }
-        }
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.label}: ${ctx.raw} unidades`,
+                    },
+                },
+            },
+        },
     });
 
     const ctxBar = document.getElementById('barChart').getContext('2d');
@@ -563,8 +611,8 @@ function initCharts() {
             datasets: [
                 { label: 'Processos Gerados', data: [], backgroundColor: '#10b981', borderRadius: 8, barPercentage: 0.6 },
                 { label: 'Instrução Pendente', data: [], backgroundColor: '#f59e0b', borderRadius: 8, barPercentage: 0.6 },
-                { label: 'Atraso Documental', data: [], backgroundColor: '#ef4444', borderRadius: 8, barPercentage: 0.6 }
-            ]
+                { label: 'Atraso Documental', data: [], backgroundColor: '#ef4444', borderRadius: 8, barPercentage: 0.6 },
+            ],
         },
         options: {
             responsive: true,
@@ -577,106 +625,32 @@ function initCharts() {
                         usePointStyle: true,
                         pointStyle: 'circle',
                         padding: 24,
-                        font: { size: 12, weight: '700' }
-                    }
+                        font: { size: 12, weight: '700' },
+                    },
                 },
                 tooltip: {
                     padding: 12,
                     cornerRadius: 8,
-                    bodyFont: { weight: '600' }
-                }
+                    bodyFont: { weight: '600' },
+                },
             },
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    stacked: true, 
-                    border: { display: false }, 
-                    grid: { color: 'rgba(0,0,0,0.03)' } 
+                y: {
+                    beginAtZero: true,
+                    stacked: true,
+                    border: { display: false },
+                    grid: { color: 'rgba(0,0,0,0.03)' },
                 },
-                x: { 
-                    stacked: true, 
-                    grid: { display: false }, 
-                    border: { display: false } 
-                }
-            }
-        }
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    border: { display: false },
+                },
+            },
+        },
     });
 
-    applyColorsToCharts(); // Apply current theme colors immediately
-}
-
-function exportReport() {
-    const element = document.createElement('div');
-    element.className = 'pdf-report-container';
-    element.innerHTML = `
-        <div class="pdf-signature">relatório produzido por "PDDE online 4ª CRE"</div>
-        <div class="pdf-header">
-            <h1>Acompanhamento Gerencial PDDE 2026</h1>
-            <p>Relatório de Status de Processos — GAD 4ª CRE</p>
-        </div>
-        <div class="pdf-summary-grid">
-            ${['basico', 'qualidade', 'equidade'].map(tipo => {
-                const s = countByStatus(tipo);
-                const label = { basico: 'Básico', qualidade: 'Qualidade', equidade: 'Equidade' }[tipo];
-                return `
-                    <div class="pdf-card">
-                        <h3>${label}</h3>
-                        <div class="pdf-stat">Concluídos: ${s.concluido} de ${s.denom} (${s.pctConcluido}%)</div>
-                        <div class="pdf-stat">Pendentes: ${s.pendente}</div>
-                        <div class="pdf-stat">Atraso: ${s.atraso}</div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-        <div class="pdf-details">
-            ${['concluido', 'pendente', 'atraso'].map(status => {
-                const label = {
-                    concluido: 'Processos Gerados na 4ª CRE',
-                    pendente: 'Pendentes de Instrução Processual',
-                    atraso: 'Atraso na Entrega Documental à GAD'
-                }[status];
-                return `
-                    <div class="pdf-section">
-                        <h2>${label}</h2>
-                        ${['basico', 'qualidade', 'equidade'].map(tipo => {
-                            const schools = getSchoolsByStatus(tipo, status);
-                            if (schools.length === 0) return '';
-                            const tipoLabel = { basico: 'Básico', qualidade: 'Qualidade', equidade: 'Equidade' }[tipo];
-                            return `
-                                <div class="pdf-type">
-                                    <h4>${tipoLabel}</h4>
-                                    <div class="pdf-school-list">
-                                        ${schools.map(e => `<span>${e.nome}</span>`).join(', ')}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-
-    document.body.appendChild(element);
-
-    const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Relatorio_PDDE_4CRE_${new Date().toLocaleDateString()}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(element).save().then(() => {
-        document.body.removeChild(element);
-    });
-}
-function updateSyncTime() {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const dateStr = now.toLocaleDateString('pt-BR');
-    const el = document.getElementById('sync-time');
-    if (el) el.textContent = `${dateStr} às ${timeStr}`;
+    applyColorsToCharts();
 }
 
 function applyColorsToCharts() {
@@ -690,26 +664,102 @@ function applyColorsToCharts() {
         charts.bar.options.scales.y.grid.color = gridColor;
         charts.bar.update();
     }
-    
+
     if (charts.doughnut) {
-        // Doughnut doesn't usually have scales but could have custom font colors
         charts.doughnut.update();
     }
 }
+
+function exportReport() {
+    const filters = getActiveFilters();
+    const activeTypes = Object.keys(TYPE_META).filter((type) => filters[type]);
+    const filteredSchools = getFilteredSchools();
+    const stats = {};
+
+    activeTypes.forEach((type) => {
+        stats[type] = calculateTypeStats(filteredSchools, type);
+    });
+
+    const element = document.createElement('div');
+    element.className = 'pdf-report-container';
+    element.innerHTML = `
+        <div class="pdf-signature">relatório produzido por "PDDE online 4ª CRE"</div>
+        <div class="pdf-header">
+            <h1>Acompanhamento Gerencial PDDE 2026</h1>
+            <p>Relatório de Status de Processos — GAD 4ª CRE</p>
+        </div>
+        <div class="pdf-summary-grid">
+            ${activeTypes.map((type) => `
+                <div class="pdf-card">
+                    <h3>${TYPE_META[type].label}</h3>
+                    <div class="pdf-stat">Concluídos: ${stats[type].concluded} de ${stats[type].total} (${stats[type].pctConcluded}%)</div>
+                    <div class="pdf-stat">Pendentes: ${stats[type].pending}</div>
+                    <div class="pdf-stat">Atraso: ${stats[type].atraso}</div>
+                </div>
+            `).join('')}
+        </div>
+        <div class="pdf-details">
+            ${Object.entries(STATUS_META).map(([status, meta]) => `
+                <div class="pdf-section">
+                    <h2>${meta.label}</h2>
+                    ${activeTypes.map((type) => {
+                        const schools = getSchoolsByStatus(filteredSchools, type, status);
+                        if (schools.length === 0) return '';
+
+                        const realSchools = schools.filter((school) => !school.synthetic).map((school) => school.nome);
+                        const syntheticGroups = groupSyntheticSchools(schools.filter((school) => school.synthetic)).map((group) => group.label);
+                        const details = [...realSchools, ...syntheticGroups];
+
+                        return `
+                            <div class="pdf-type">
+                                <h4>${TYPE_META[type].label}</h4>
+                                <div class="pdf-school-list">${details.join(', ')}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    document.body.appendChild(element);
+
+    const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Relatorio_PDDE_4CRE_${new Date().toLocaleDateString('pt-BR')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        document.body.removeChild(element);
+    });
+}
+
 function initMagnetEffect() {
     const cards = document.querySelectorAll('.kpi-card');
-    
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
+
+    cards.forEach((card) => {
+        card.addEventListener('mousemove', (event) => {
             const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            
-            card.style.transform = `translateY(-12px) scale(1.03) rotateX(${-y/20}deg) rotateY(${x/20}deg)`;
+            const x = event.clientX - rect.left - rect.width / 2;
+            const y = event.clientY - rect.top - rect.height / 2;
+
+            card.style.transform = `translateY(-12px) scale(1.03) rotateX(${-y / 20}deg) rotateY(${x / 20}deg)`;
         });
-        
+
         card.addEventListener('mouseleave', () => {
             card.style.transform = '';
         });
     });
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
