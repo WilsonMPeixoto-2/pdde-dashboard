@@ -498,6 +498,9 @@ body {
 .sync-issue.warning {
     border-color: rgba(245, 158, 11, 0.35);
 }
+.sync-issue.info {
+    border-color: rgba(37, 99, 235, 0.28);
+}
 .sync-issue.error {
     border-color: rgba(239, 68, 68, 0.35);
 }

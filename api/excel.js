@@ -465,7 +465,7 @@ function buildIssues({ blankRows, totals, metrics, namedRecords }) {
         issues.push({
             code: 'blank-control-rows',
             severity: 'warning',
-            message: `A aba CONTROLE possui ${blankRows.length} linha(s) vazia(s) dentro da faixa de dados usada pelo resumo oficial.`,
+            message: `A aba CONTROLE possui ${blankRows.length} linha(s) vazia(s) dentro da faixa usada pelo resumo oficial. Essas linhas continuam entrando no total e exigem conferência na planilha.`,
         });
     }
 
@@ -475,27 +475,57 @@ function buildIssues({ blankRows, totals, metrics, namedRecords }) {
         equidade: totals.equidade,
     }).forEach(([type, official]) => {
         const named = namedMetrics[type];
+        const reconciled = metrics[type];
         const officialTotal = official.total || named.total;
         const officialConcluded = official.concluded || named.concluded;
+        const syntheticConcluded = Math.max(0, officialConcluded - named.concluded);
+        const syntheticAtraso = Math.max(0, officialTotal - (named.total + syntheticConcluded));
+        const syntheticTotal = syntheticConcluded + syntheticAtraso;
 
-        if (officialConcluded > named.concluded) {
+        if (officialConcluded < named.concluded) {
             issues.push({
-                code: `${type}-official-concluded-gap`,
+                code: `${type}-named-concluded-overflow`,
                 severity: 'warning',
-                message: `A aba DASHBOARD contabiliza ${officialConcluded} concluido(s) em ${type}, mas a aba CONTROLE identifica nominalmente ${named.concluded}.`,
+                message: `A aba CONTROLE identifica ${named.concluded} concluido(s) em ${formatTypeLabel(type)}, mas a aba DASHBOARD resume apenas ${officialConcluded}.`,
             });
         }
 
-        if (officialTotal > named.total) {
+        if (officialTotal < named.total) {
             issues.push({
-                code: `${type}-official-total-gap`,
+                code: `${type}-named-total-overflow`,
                 severity: 'warning',
-                message: `O total oficial de ${type} na aba DASHBOARD e ${officialTotal}, enquanto a listagem nominal identificavel na aba CONTROLE soma ${named.total}.`,
+                message: `A listagem nominal da aba CONTROLE soma ${named.total} registro(s) em ${formatTypeLabel(type)}, acima do total oficial ${officialTotal} mostrado na aba DASHBOARD.`,
+            });
+        }
+
+        if (syntheticTotal > 0 && reconciled.synthetic > 0) {
+            const details = [];
+            if (syntheticConcluded > 0) {
+                details.push(`${syntheticConcluded} conclusao(oes) sem identificacao nominal`);
+            }
+            if (syntheticAtraso > 0) {
+                details.push(`${syntheticAtraso} unidade(s) ainda nao identificada(s)`);
+            }
+
+            issues.push({
+                code: `${type}-synthetic-reconciliation`,
+                severity: 'info',
+                message: `A conciliacao entre CONTROLE e DASHBOARD em ${formatTypeLabel(type)} adicionou ${syntheticTotal} ajuste(s) sintetico(s): ${details.join(' e ')}.`,
             });
         }
     });
 
     return issues;
+}
+
+function formatTypeLabel(type) {
+    const labels = {
+        basico: 'Basico',
+        qualidade: 'Qualidade',
+        equidade: 'Equidade',
+    };
+
+    return labels[type] || type;
 }
 
 function classifyStatus(docValue, processValue) {

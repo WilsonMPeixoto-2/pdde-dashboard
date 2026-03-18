@@ -525,9 +525,21 @@ function renderSyncDetails() {
     }
 
     if (issues.length > 0) {
+        const warnings = issues.filter((issue) => issue.severity === 'warning' || issue.severity === 'error').length;
+        const infos = issues.filter((issue) => issue.severity === 'info').length;
+        const summaryParts = [];
+
+        if (warnings > 0) {
+            summaryParts.push(`${warnings} alerta(s)`);
+        }
+
+        if (infos > 0) {
+            summaryParts.push(`${infos} conciliacao(oes) automatica(s)`);
+        }
+
         parts.push(`
             <details class="sync-issue-group">
-                <summary>${issues.length} alerta(s) de integridade da planilha</summary>
+                <summary>${summaryParts.join(' e ') || `${issues.length} sinalizacao(oes)`} da planilha</summary>
                 <div class="sync-issue-list">
                     ${issues.map((issue) => `
                         <div class="sync-issue ${issue.severity || 'warning'}">
