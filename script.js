@@ -14,7 +14,7 @@ const STATUS_META = {
         className: 'status-concluido',
     },
     pendente: {
-        label: 'Pendentes de Instrução Processual',
+        label: 'Documentação pronta / aguardando processo',
         icon: 'clock',
         className: 'status-pendente',
     },
@@ -608,7 +608,7 @@ function initCharts() {
         return new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Processos Gerados', 'Instrução Pendente', 'Atraso Documental'],
+                labels: ['Processos Gerados', 'Documentação pronta', 'Atraso Documental'],
                 datasets: [{
                     data: [0, 0, 0],
                     backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
