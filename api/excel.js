@@ -60,6 +60,7 @@ module.exports._internal = {
     createSyntheticRecords,
     normalizeWorkbook,
     parseDashboardTotals,
+    validateRequiredColumns,
 };
 
 function setNoStoreHeaders(res) {
@@ -183,6 +184,7 @@ function buildDashboardPayload({ workbook, controlSheetName, summarySheetName, s
 function normalizeWorkbook(controlRows, summaryRows) {
     const headerRow = controlRows[0] || [];
     const columnMap = buildColumnMap(headerRow);
+    validateRequiredColumns(columnMap);
     const totals = parseDashboardTotals(summaryRows);
 
     const parsedRows = controlRows.slice(1).map((row, index) => parseControlRow(row, index + 2, columnMap));
@@ -242,6 +244,24 @@ function buildColumnMap(headerRow) {
         equidadeProc: findHeaderIndex(normalizedHeaders, (header) => header.includes('processo equidade')),
         equidadeEligibility: findHeaderIndex(normalizedHeaders, (header) => header.includes('equidade') && (header.includes('eleg') || header.includes('criterio') || header.includes('perfil') || header.includes('publico'))),
     };
+}
+
+function validateRequiredColumns(columnMap) {
+    const required = [
+        { key: 'designation', label: 'DESIGNAÇÃO' },
+        { key: 'name', label: 'NOME DA UNIDADE ESCOLAR' },
+        { key: 'basicoProc', label: 'Nº Processo Básico' },
+        { key: 'qualidadeProc', label: 'Nº Processo Qualidade' },
+        { key: 'equidadeProc', label: 'Nº Processo EQUIDADE' },
+    ];
+
+    const missing = required
+        .filter(({ key }) => !Number.isInteger(columnMap[key]) || columnMap[key] < 0)
+        .map(({ label }) => label);
+
+    if (missing.length > 0) {
+        throw new Error(`Nao foi possivel localizar coluna(s) obrigatoria(s) na aba CONTROLE: ${missing.join(', ')}.`);
+    }
 }
 
 function parseControlRow(row, excelRowNumber, columnMap) {

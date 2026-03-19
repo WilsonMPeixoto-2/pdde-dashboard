@@ -35,3 +35,12 @@ test('normalizeWorkbook keeps the reconciled snapshot metrics from try2.xlsx sta
     assert.equal(normalized.metrics.global.total, 366);
     assert.equal(normalized.issues.length > 0, true);
 });
+
+test('normalizeWorkbook fails clearly when required process columns are missing', () => {
+    assert.throws(() => {
+        excelApi.normalizeWorkbook([
+            ['R.A.', 'DESIGNAÇÃO', 'SICI', 'NOME DA UNIDADE ESCOLAR'],
+            ['10', 'E/CRE(04.10.001)', '11263', 'Unidade de teste'],
+        ], []);
+    }, /coluna\(s\) obrigatoria\(s\)/i);
+});
