@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 
 const xlsx = require('xlsx');
-const excelApi = require('./excel')._internal;
+const excelApi = require('../api/excel')._internal;
 
 test('parseDashboardTotals preserves explicit zero values from summary sheet', () => {
     const totals = excelApi.parseDashboardTotals([
