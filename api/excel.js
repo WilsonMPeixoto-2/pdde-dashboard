@@ -58,6 +58,7 @@ module.exports._internal = {
     calculateMetrics,
     classifyStatus,
     createSyntheticRecords,
+    findWhitespaceOnlyProcessCells,
     normalizeWorkbook,
     parseDashboardTotals,
     validateRequiredColumns,
@@ -186,6 +187,7 @@ function normalizeWorkbook(controlRows, summaryRows) {
     const columnMap = buildColumnMap(headerRow);
     validateRequiredColumns(columnMap);
     const totals = parseDashboardTotals(summaryRows);
+    const whitespaceOnlyProcessCells = findWhitespaceOnlyProcessCells(controlRows, columnMap);
 
     const parsedRows = controlRows.slice(1).map((row, index) => parseControlRow(row, index + 2, columnMap));
     const namedRecords = parsedRows
@@ -213,6 +215,7 @@ function normalizeWorkbook(controlRows, summaryRows) {
         totals,
         metrics,
         namedRecords,
+        whitespaceOnlyProcessCells,
     });
 
     return {
@@ -244,6 +247,28 @@ function buildColumnMap(headerRow) {
         equidadeProc: findHeaderIndex(normalizedHeaders, (header) => header.includes('processo equidade')),
         equidadeEligibility: findHeaderIndex(normalizedHeaders, (header) => header.includes('equidade') && (header.includes('eleg') || header.includes('criterio') || header.includes('perfil') || header.includes('publico'))),
     };
+}
+
+function findWhitespaceOnlyProcessCells(controlRows, columnMap) {
+    const processColumns = [
+        { type: 'basico', index: columnMap.basicoProc },
+        { type: 'qualidade', index: columnMap.qualidadeProc },
+        { type: 'equidade', index: columnMap.equidadeProc },
+    ];
+
+    return controlRows.slice(1).flatMap((row, index) => processColumns.flatMap((column) => {
+        const rawValue = row[column.index];
+        if (typeof rawValue !== 'string' || rawValue === '' || rawValue.trim() !== '') {
+            return [];
+        }
+
+        return [{
+            type: column.type,
+            sourceRow: index + 2,
+            nome: cleanText(row[columnMap.name]) || null,
+            designacao: cleanText(row[columnMap.designation]) || null,
+        }];
+    }));
 }
 
 function validateRequiredColumns(columnMap) {
@@ -386,7 +411,7 @@ function createSyntheticRecords({ namedRecords, blankRows, totals, dominantCreCo
                     ? `Linha ${blankRowNumber} sem unidade identificada`
                     : `Unidade ${type} nao identificada (${index + 1})`,
                 reason: blankRowNumber
-                    ? `A linha ${blankRowNumber} da aba CONTROLE esta vazia, mas continua entrando no total oficial de ${type}.`
+                    ? `A linha ${blankRowNumber} da aba CONTROLE esta vazia dentro da faixa utilizada pela planilha e precisa ser conferida antes de atribuir nominalmente o total oficial de ${type}.`
                     : `O total oficial de ${type} na aba DASHBOARD e maior do que a listagem nominal disponivel na aba CONTROLE.`,
                 sourceRow: blankRowNumber,
             }));
@@ -473,7 +498,7 @@ function calculateTypeMetrics(records, type) {
     };
 }
 
-function buildIssues({ blankRows, totals, metrics, namedRecords }) {
+function buildIssues({ blankRows, totals, metrics, namedRecords, whitespaceOnlyProcessCells = [] }) {
     const issues = [];
     const namedMetrics = {
         basico: calculateTypeMetrics(namedRecords, 'basico'),
@@ -485,9 +510,18 @@ function buildIssues({ blankRows, totals, metrics, namedRecords }) {
         issues.push({
             code: 'blank-control-rows',
             severity: 'warning',
-            message: `A aba CONTROLE possui ${blankRows.length} linha(s) vazia(s) dentro da faixa usada pelo resumo oficial. Essas linhas continuam entrando no total e exigem conferência na planilha.`,
+            message: `A aba CONTROLE possui ${blankRows.length} linha(s) vazia(s) dentro da faixa utilizada pela planilha. Elas exigem conferencia porque podem distorcer a conciliacao com o resumo oficial.`,
         });
     }
+
+    whitespaceOnlyProcessCells.forEach((cell) => {
+        const unitLabel = cell.nome ? `${cell.nome} (linha ${cell.sourceRow})` : `linha ${cell.sourceRow}`;
+        issues.push({
+            code: `${cell.type}-whitespace-process-cell`,
+            severity: 'warning',
+            message: `A coluna de processo de ${formatTypeLabel(cell.type)} em ${unitLabel} contem apenas espacos. A aba DASHBOARD pode contabilizar essa celula como processo concluido mesmo sem numero valido.`,
+        });
+    });
 
     Object.entries({
         basico: totals.basico,

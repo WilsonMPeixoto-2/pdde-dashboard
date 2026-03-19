@@ -44,3 +44,49 @@ test('normalizeWorkbook fails clearly when required process columns are missing'
         ], []);
     }, /coluna\(s\) obrigatoria\(s\)/i);
 });
+
+test('findWhitespaceOnlyProcessCells flags process cells filled only with spaces', () => {
+    const controlRows = [
+        [
+            'R.A.',
+            'DESIGNAÇÃO',
+            'SICI',
+            'NOME DA UNIDADE ESCOLAR',
+            'Todas as documentações concluídas e assinadas - Data',
+            'Nº Processo Básico',
+            'Instrução processual concluída - Data',
+            'Data de Publicação em D.O',
+            'SINALIZADO À GCGR',
+            'Todas as documentações concluídas e assinadas - Data',
+            'Nº Processo Qualidade',
+            'Instrução processual concluída - Data',
+            'Data de Publicação em D.O',
+            'SINALIZADO À GCGR',
+            'Todas as documentações concluídas e assinadas - Data',
+            'Nº Processo EQUIDADE',
+            'Instrução processual concluída - Data',
+            'Data da Publicação em D.O',
+            'SINALIZADO À GCGR',
+        ],
+        ['31', 'E/CRE(04.31.022)', '11327', 'Escola Municipal Eneyda Rabello de Andrade', '', '', '', '', '', '', '   ', '', '', '', '', '', '', '', ''],
+        ['31', 'E/CRE(04.31.606)', '18784', 'Creche Municipal Visconde de Sabugosa', '', '', '', '', '', '', '', '', '', '', '', ' ', '', '', ''],
+    ];
+
+    const columnMap = excelApi.buildColumnMap(controlRows[0]);
+    const issues = excelApi.findWhitespaceOnlyProcessCells(controlRows, columnMap);
+
+    assert.deepEqual(issues, [
+        {
+            type: 'qualidade',
+            sourceRow: 2,
+            nome: 'Escola Municipal Eneyda Rabello de Andrade',
+            designacao: 'E/CRE(04.31.022)',
+        },
+        {
+            type: 'equidade',
+            sourceRow: 3,
+            nome: 'Creche Municipal Visconde de Sabugosa',
+            designacao: 'E/CRE(04.31.606)',
+        },
+    ]);
+});

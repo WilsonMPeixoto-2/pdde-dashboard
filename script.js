@@ -647,7 +647,7 @@ function initCharts() {
             labels: [],
             datasets: [
                 { label: 'Processos Gerados', data: [], backgroundColor: '#10b981', borderRadius: 8, barPercentage: 0.6 },
-                { label: 'Instrução Pendente', data: [], backgroundColor: '#f59e0b', borderRadius: 8, barPercentage: 0.6 },
+                { label: 'Documentação pronta', data: [], backgroundColor: '#f59e0b', borderRadius: 8, barPercentage: 0.6 },
                 { label: 'Atraso Documental', data: [], backgroundColor: '#ef4444', borderRadius: 8, barPercentage: 0.6 },
             ],
         },
