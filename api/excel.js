@@ -339,8 +339,8 @@ function createSyntheticRecords({ namedRecords, blankRows, totals, dominantCreCo
         equidade: totals.equidade,
     }).forEach(([type, official]) => {
         const named = namedStats[type];
-        const officialTotal = official.total || named.total;
-        const officialConcluded = official.concluded || named.concluded;
+        const officialTotal = official.total ?? named.total;
+        const officialConcluded = official.concluded ?? named.concluded;
         const syntheticConcluded = Math.max(0, officialConcluded - named.concluded);
         const syntheticAtraso = Math.max(0, officialTotal - (named.total + syntheticConcluded));
 
@@ -476,8 +476,8 @@ function buildIssues({ blankRows, totals, metrics, namedRecords }) {
     }).forEach(([type, official]) => {
         const named = namedMetrics[type];
         const reconciled = metrics[type];
-        const officialTotal = official.total || named.total;
-        const officialConcluded = official.concluded || named.concluded;
+        const officialTotal = official.total ?? named.total;
+        const officialConcluded = official.concluded ?? named.concluded;
         const syntheticConcluded = Math.max(0, officialConcluded - named.concluded);
         const syntheticAtraso = Math.max(0, officialTotal - (named.total + syntheticConcluded));
         const syntheticTotal = syntheticConcluded + syntheticAtraso;

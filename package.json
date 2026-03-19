@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "node --test"
+  },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "aos": "^2.3.4",
