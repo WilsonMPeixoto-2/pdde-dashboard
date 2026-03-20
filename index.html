@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.14.0/dist/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@0.577.0/dist/umd/lucide.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.23/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.24/dist/sweetalert2.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"></script>
@@ -61,7 +61,7 @@
                 <div class="filter-group">
                     <h3>FILTRO POR CRE</h3>
                     <div class="custom-select">
-                        <select id="filter-cre">
+                        <select id="filter-cre" aria-label="Filtro por CRE">
                             <option value="all">Todas as CREs</option>
                             <option value="4" selected>4ª CRE</option>
                         </select>
@@ -72,7 +72,7 @@
                 <div class="filter-group">
                     <h3>STATUS DO PROCESSO</h3>
                     <div class="custom-select">
-                        <select id="filter-status">
+                        <select id="filter-status" aria-label="Status do Processo">
                             <option value="all">Ver Todos os Status</option>
                             <option value="concluido">Processos Gerados</option>
                             <option value="pendente">Documentação pronta</option>
@@ -93,7 +93,7 @@
                 </div>
                 <div class="data-source">
                     <p class="source-label">Fonte de Dados Oficial:</p>
-                    <a href="https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=YitaBf" target="_blank" class="source-link" id="source-link">
+                    <a href="https://rioeduca-my.sharepoint.com/:x:/g/personal/wilson_mpeixoto_rioeduca_net/IQBfthSt4_rrSrPUrxqxwDY7AfUSuaRqf_03-JACEivzpkQ?e=YitaBf" target="_blank" rel="noopener" class="source-link" id="source-link">
                         <i data-lucide="file-spreadsheet" class="excel-icon"></i>
                         <span id="source-file-name">PDDE_2026_FINAL.xlsx</span>
                         <i data-lucide="external-link" class="external-icon"></i>
@@ -107,7 +107,7 @@
         <main class="main-content">
             <header class="header">
                 <div class="header-left">
-                    <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu">
                         <i data-lucide="menu"></i>
                     </button>
                     <div class="greeting">
