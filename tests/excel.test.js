@@ -29,10 +29,10 @@ test('normalizeWorkbook keeps the reconciled snapshot metrics from try2.xlsx sta
     assert.equal(normalized.metrics.basico.total, 163);
     assert.equal(normalized.metrics.qualidade.concluded, 58);
     assert.equal(normalized.metrics.qualidade.total, 163);
-    assert.equal(normalized.metrics.equidade.concluded, 26);
-    assert.equal(normalized.metrics.equidade.total, 29);
-    assert.equal(normalized.metrics.global.concluded, 190);
-    assert.equal(normalized.metrics.global.total, 355);
+    assert.equal(normalized.metrics.equidade.concluded, 27);
+    assert.equal(normalized.metrics.equidade.total, 38);
+    assert.equal(normalized.metrics.global.concluded, 191);
+    assert.equal(normalized.metrics.global.total, 364);
     assert.equal(normalized.issues.length > 0, true);
 });
 

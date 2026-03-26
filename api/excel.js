@@ -371,6 +371,7 @@ function parseDashboardTotals(rows) {
 
 function createSyntheticRecords({ namedRecords, blankRows, totals, dominantCreCode }) {
     const syntheticRecords = [];
+    const totalNamedSchools = namedRecords.length;
     const namedStats = {
         basico: calculateTypeMetrics(namedRecords, 'basico'),
         qualidade: calculateTypeMetrics(namedRecords, 'qualidade'),
@@ -384,7 +385,7 @@ function createSyntheticRecords({ namedRecords, blankRows, totals, dominantCreCo
         equidade: totals.equidade,
     }).forEach(([type, official]) => {
         const named = namedStats[type];
-        const officialTotal = named.total;
+        const officialTotal = Math.min(official.total ?? named.total, totalNamedSchools);
         const officialConcluded = official.concluded ?? named.concluded;
         const maxSynthetic = Math.max(0, officialTotal - named.total);
         const syntheticConcluded = Math.max(0, Math.min(officialConcluded - named.concluded, maxSynthetic));
@@ -531,7 +532,7 @@ function buildIssues({ blankRows, totals, metrics, namedRecords, whitespaceOnlyP
     }).forEach(([type, official]) => {
         const named = namedMetrics[type];
         const reconciled = metrics[type];
-        const officialTotal = named.total;
+        const officialTotal = Math.min(official.total ?? named.total, namedRecords.length);
         const officialConcluded = official.concluded ?? named.concluded;
         const maxSynthetic = Math.max(0, officialTotal - named.total);
         const syntheticConcluded = Math.max(0, Math.min(officialConcluded - named.concluded, maxSynthetic));
@@ -546,11 +547,11 @@ function buildIssues({ blankRows, totals, metrics, namedRecords, whitespaceOnlyP
             });
         }
 
-        if (official.total !== null && official.total > named.total) {
+        if (official.total !== null && official.total > namedRecords.length) {
             issues.push({
                 code: `${type}-dashboard-total-exceeds-control`,
                 severity: 'warning',
-                message: `A aba DASHBOARD indica ${official.total} unidade(s) para ${formatTypeLabel(type)}, mas a aba CONTROLE lista ${named.total}. O total real da aba CONTROLE foi adotado.`,
+                message: `A aba DASHBOARD indica ${official.total} unidade(s) para ${formatTypeLabel(type)}, mas a aba CONTROLE lista ${namedRecords.length} escolas. O total foi limitado a ${namedRecords.length}.`,
             });
         }
 
