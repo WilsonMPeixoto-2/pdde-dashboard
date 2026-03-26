@@ -384,9 +384,10 @@ function createSyntheticRecords({ namedRecords, blankRows, totals, dominantCreCo
         equidade: totals.equidade,
     }).forEach(([type, official]) => {
         const named = namedStats[type];
-        const officialTotal = official.total ?? named.total;
+        const officialTotal = named.total;
         const officialConcluded = official.concluded ?? named.concluded;
-        const syntheticConcluded = Math.max(0, officialConcluded - named.concluded);
+        const maxSynthetic = Math.max(0, officialTotal - named.total);
+        const syntheticConcluded = Math.max(0, Math.min(officialConcluded - named.concluded, maxSynthetic));
         const syntheticAtraso = Math.max(0, officialTotal - (named.total + syntheticConcluded));
 
         for (let index = 0; index < syntheticConcluded; index += 1) {
@@ -530,9 +531,10 @@ function buildIssues({ blankRows, totals, metrics, namedRecords, whitespaceOnlyP
     }).forEach(([type, official]) => {
         const named = namedMetrics[type];
         const reconciled = metrics[type];
-        const officialTotal = official.total ?? named.total;
+        const officialTotal = named.total;
         const officialConcluded = official.concluded ?? named.concluded;
-        const syntheticConcluded = Math.max(0, officialConcluded - named.concluded);
+        const maxSynthetic = Math.max(0, officialTotal - named.total);
+        const syntheticConcluded = Math.max(0, Math.min(officialConcluded - named.concluded, maxSynthetic));
         const syntheticAtraso = Math.max(0, officialTotal - (named.total + syntheticConcluded));
         const syntheticTotal = syntheticConcluded + syntheticAtraso;
 
@@ -544,11 +546,19 @@ function buildIssues({ blankRows, totals, metrics, namedRecords, whitespaceOnlyP
             });
         }
 
-        if (officialTotal < named.total) {
+        if (official.total !== null && official.total > named.total) {
+            issues.push({
+                code: `${type}-dashboard-total-exceeds-control`,
+                severity: 'warning',
+                message: `A aba DASHBOARD indica ${official.total} unidade(s) para ${formatTypeLabel(type)}, mas a aba CONTROLE lista ${named.total}. O total real da aba CONTROLE foi adotado.`,
+            });
+        }
+
+        if (official.total !== null && official.total < named.total) {
             issues.push({
                 code: `${type}-named-total-overflow`,
                 severity: 'warning',
-                message: `A listagem nominal da aba CONTROLE soma ${named.total} registro(s) em ${formatTypeLabel(type)}, acima do total oficial ${officialTotal} mostrado na aba DASHBOARD.`,
+                message: `A listagem nominal da aba CONTROLE soma ${named.total} registro(s) em ${formatTypeLabel(type)}, acima do total oficial ${official.total} mostrado na aba DASHBOARD.`,
             });
         }
 
